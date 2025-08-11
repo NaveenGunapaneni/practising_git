@@ -1,0 +1,76 @@
+Test Case ID,Test Case Name,API Endpoint,HTTP Method,Priority,Test Description,Preconditions,Test Steps,Request Data,Expected Response,Actual Response,Status,Notes
+API-TC-001,User Registration - Valid Data,/api/auth/register,POST,High,Verify user registration with valid data,API server is running,"1. Send POST request to /api/auth/register
+2. Include valid user data
+3. Check response status and data
+4. Verify user is created in database",{""email"": ""john@email.com"", ""password"": ""Password123!"", ""confirm_password"": ""Password123!""},Status: 201, Body: {""message"": ""User registered successfully"", ""user_id"": ""uuid""},,,Pass/Fail,
+API-TC-002,User Registration - Invalid Email,/api/auth/register,POST,High,Verify registration fails with invalid email,API server is running,"1. Send POST request with invalid email
+2. Check response status and error message",{""email"": ""invalid-email"", ""password"": ""Password123!"", ""confirm_password"": ""Password123!""},Status: 400, Body: {""error"": ""Invalid email format""},,,Pass/Fail,
+API-TC-003,User Registration - Weak Password,/api/auth/register,POST,High,Verify registration fails with weak password,API server is running,"1. Send POST request with weak password
+2. Check response status and error message",{""email"": ""john@email.com"", ""password"": ""123"", ""confirm_password"": ""123""},Status: 400, Body: {""error"": ""Password must be at least 8 characters""},,,Pass/Fail,
+API-TC-004,User Registration - Password Mismatch,/api/auth/register,POST,High,Verify registration fails with password mismatch,API server is running,"1. Send POST request with mismatched passwords
+2. Check response status and error message",{""email"": ""john@email.com"", ""password"": ""Password123!"", ""confirm_password"": ""DifferentPass123!""},Status: 400, Body: {""error"": ""Passwords do not match""},,,Pass/Fail,
+API-TC-005,User Registration - Duplicate Email,/api/auth/register,POST,High,Verify registration fails with existing email,User already exists in database,"1. Send POST request with existing email
+2. Check response status and error message",{""email"": ""existing@email.com"", ""password"": ""Password123!"", ""confirm_password"": ""Password123!""},Status: 409, Body: {""error"": ""Email already registered""},,,Pass/Fail,
+API-TC-006,User Login - Valid Credentials,/api/auth/login,POST,High,Verify login with valid credentials,User exists in database,"1. Send POST request with valid credentials
+2. Check response status and JWT token
+3. Verify token structure",{""email"": ""john@email.com"", ""password"": ""Password123!""},Status: 200, Body: {""access_token"": ""jwt_token"", ""token_type"": ""bearer"", ""expires_in"": 3600},,,Pass/Fail,
+API-TC-007,User Login - Invalid Credentials,/api/auth/login,POST,High,Verify login fails with invalid credentials,API server is running,"1. Send POST request with invalid credentials
+2. Check response status and error message",{""email"": ""john@email.com"", ""password"": ""WrongPassword""},Status: 401, Body: {""error"": ""Invalid credentials""},,,Pass/Fail,
+API-TC-008,User Login - Non-existent User,/api/auth/login,POST,High,Verify login fails with non-existent user,API server is running,"1. Send POST request with non-existent email
+2. Check response status and error message",{""email"": ""nonexistent@email.com"", ""password"": ""Password123!""},Status: 401, Body: {""error"": ""Invalid credentials""},,,Pass/Fail,
+API-TC-009,Dashboard Data - Authenticated User,/api/dashboard,GET,High,Verify dashboard data retrieval with valid token,User is authenticated,"1. Send GET request with valid JWT token
+2. Check response status and data structure
+3. Verify user-specific data",Authorization: Bearer {jwt_token},Status: 200, Body: {""user_info"": {...}, ""metrics"": {...}, ""recent_files"": [...]},,,Pass/Fail,
+API-TC-010,Dashboard Data - Invalid Token,/api/dashboard,GET,High,Verify dashboard access fails with invalid token,API server is running,"1. Send GET request with invalid token
+2. Check response status and error message",Authorization: Bearer invalid_token,Status: 401, Body: {""error"": ""Invalid token""},,,Pass/Fail,
+API-TC-011,Dashboard Data - No Token,/api/dashboard,GET,High,Verify dashboard access fails without token,API server is running,"1. Send GET request without token
+2. Check response status and error message",No Authorization header,Status: 401, Body: {""error"": ""Missing authentication token""},,,Pass/Fail,
+API-TC-012,File Upload - Valid File,/api/files/upload,POST,High,Verify file upload with valid XLSX file,User is authenticated,"1. Send POST request with valid file
+2. Include authentication token
+3. Check response status and file metadata",Form data with XLSX file, Authorization: Bearer {jwt_token},Status: 201, Body: {""file_id"": ""uuid"", ""filename"": ""test.xlsx"", ""status"": ""uploaded""},,,Pass/Fail,
+API-TC-013,File Upload - Invalid File Type,/api/files/upload,POST,High,Verify file upload fails with invalid file type,User is authenticated,"1. Send POST request with invalid file type
+2. Check response status and error message",Form data with TXT file, Authorization: Bearer {jwt_token},Status: 400, Body: {""error"": ""Invalid file type. Only XLSX and CSV files are allowed.""},,,Pass/Fail,
+API-TC-014,File Upload - File Too Large,/api/files/upload,POST,High,Verify file upload fails with oversized file,User is authenticated,"1. Send POST request with file > 50MB
+2. Check response status and error message",Form data with 60MB file, Authorization: Bearer {jwt_token},Status: 400, Body: {""error"": ""File size exceeds maximum limit of 50MB""},,,Pass/Fail,
+API-TC-015,File Upload - No Authentication,/api/files/upload,POST,High,Verify file upload fails without authentication,API server is running,"1. Send POST request without token
+2. Check response status and error message",Form data with file, No Authorization header,Status: 401, Body: {""error"": ""Missing authentication token""},,,Pass/Fail,
+API-TC-016,File Processing - Start Processing,/api/files/{file_id}/process,POST,High,Verify file processing starts correctly,File is uploaded,"1. Send POST request to start processing
+2. Include authentication token
+3. Check response status and processing status",Authorization: Bearer {jwt_token},Status: 202, Body: {""processing_id"": ""uuid"", ""status"": ""processing""},,,Pass/Fail,
+API-TC-017,File Processing - Check Status,/api/files/{file_id}/status,GET,High,Verify processing status retrieval,File processing is in progress,"1. Send GET request to check status
+2. Include authentication token
+3. Check response with current status",Authorization: Bearer {jwt_token},Status: 200, Body: {""status"": ""processing"", ""progress"": 75, ""estimated_completion"": ""2025-08-01T15:30:00Z""},,,Pass/Fail,
+API-TC-018,File Processing - Get Results,/api/files/{file_id}/results,GET,High,Verify results retrieval after processing,File processing is complete,"1. Send GET request to get results
+2. Include authentication token
+3. Check response with processed data",Authorization: Bearer {jwt_token},Status: 200, Body: {""results"": {...}, ""download_url"": ""/api/files/{file_id}/download""},,,Pass/Fail,
+API-TC-019,File Download - Valid File,/api/files/{file_id}/download,GET,High,Verify file download functionality,File processing is complete,"1. Send GET request to download file
+2. Include authentication token
+3. Check response headers and file content",Authorization: Bearer {jwt_token},Status: 200, Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, Content-Disposition: attachment,File downloads successfully with correct content type and filename.,,,Pass/Fail,
+API-TC-020,File Download - Unauthorized Access,/api/files/{file_id}/download,GET,High,Verify download fails for unauthorized user,File exists but user doesn't own it,"1. Send GET request with different user's token
+2. Check response status and error message",Authorization: Bearer {other_user_token},Status: 403, Body: {""error"": ""Access denied""},,,Pass/Fail,
+API-TC-021,Transaction History - Get User Files,/api/files,GET,High,Verify transaction history retrieval,User has uploaded files,"1. Send GET request to get file history
+2. Include authentication token
+3. Check response with pagination",Authorization: Bearer {jwt_token}, Query: ?page=1&limit=10,Status: 200, Body: {""files"": [...], ""pagination"": {""page"": 1, ""total"": 25, ""pages"": 3}},,,Pass/Fail,
+API-TC-022,Transaction History - Search Files,/api/files/search,GET,High,Verify file search functionality,User has uploaded files,"1. Send GET request with search parameters
+2. Include authentication token
+3. Check response with filtered results",Authorization: Bearer {jwt_token}, Query: ?q=invoice&date_from=2025-01-01,Status: 200, Body: {""files"": [...], ""total_results"": 5},,,Pass/Fail,
+API-TC-023,User Profile - Get Profile,/api/user/profile,GET,High,Verify user profile retrieval,User is authenticated,"1. Send GET request to get profile
+2. Include authentication token
+3. Check response with user data",Authorization: Bearer {jwt_token},Status: 200, Body: {""email"": ""john@email.com"", ""created_at"": ""2025-01-01T00:00:00Z"", ""last_login"": ""2025-08-01T10:00:00Z""},,,Pass/Fail,
+API-TC-024,User Profile - Update Profile,/api/user/profile,PUT,High,Verify user profile update,User is authenticated,"1. Send PUT request to update profile
+2. Include authentication token and new data
+3. Check response with updated data",Authorization: Bearer {jwt_token}, Body: {""email"": ""newemail@email.com""},Status: 200, Body: {""message"": ""Profile updated successfully"", ""email"": ""newemail@email.com""},,,Pass/Fail,
+API-TC-025,User Profile - Change Password,/api/user/change-password,POST,High,Verify password change functionality,User is authenticated,"1. Send POST request to change password
+2. Include authentication token and password data
+3. Check response status",Authorization: Bearer {jwt_token}, Body: {""current_password"": ""OldPass123!"", ""new_password"": ""NewPass123!""},Status: 200, Body: {""message"": ""Password changed successfully""},,,Pass/Fail,
+API-TC-026,Metrics - Get User Metrics,/api/metrics,GET,High,Verify metrics retrieval,User is authenticated,"1. Send GET request to get metrics
+2. Include authentication token
+3. Check response with user metrics",Authorization: Bearer {jwt_token},Status: 200, Body: {""total_files"": 25, ""total_processed"": 23, ""success_rate"": 92.0, ""average_processing_time"": 45.5},,,Pass/Fail,
+API-TC-027,Health Check - API Status,/api/health,GET,Low,Verify API health check endpoint,API server is running,"1. Send GET request to health check
+2. Check response status and health data",No authentication required,Status: 200, Body: {""status"": ""healthy"", ""timestamp"": ""2025-08-01T10:00:00Z"", ""version"": ""1.0.0""},,,Pass/Fail,
+API-TC-028,Rate Limiting - Normal Usage,/api/auth/login,POST,Medium,Verify rate limiting under normal usage,API server is running,"1. Send multiple requests within rate limit
+2. Check all requests succeed",Multiple login requests within 1 minute,All requests return 200/201 status codes. No rate limiting applied.,,,Pass/Fail,
+API-TC-029,Rate Limiting - Exceeded Limit,/api/auth/login,POST,Medium,Verify rate limiting when exceeded,API server is running,"1. Send requests exceeding rate limit
+2. Check response status and error message",Excessive login requests (>10/minute),Status: 429, Body: {""error"": ""Rate limit exceeded. Try again later.""},,,Pass/Fail,
+API-TC-030,Input Validation - SQL Injection Attempt,/api/auth/login,POST,High,Verify SQL injection protection,API server is running,"1. Send request with SQL injection payload
+2. Check response status and error handling",{""email"": ""'; DROP TABLE users; --"", ""password"": ""test""},Status: 400, Body: {""error"": ""Invalid input format""},,,Pass/Fail,

@@ -1,0 +1,120 @@
+Test Case ID,Test Case Name,Test Category,Priority,Test Description,Preconditions,Test Steps,Test Data,Expected Result,Actual Result,Status,Notes
+DB-TC-001,User Registration - Database Insert,Data Insertion,High,Verify user registration creates correct database record,Database is running and accessible,"1. Register new user via API
+2. Check users table for new record
+3. Verify all fields are correctly stored
+4. Check password is hashed",{""email"": ""john@email.com"", ""password"": ""Password123!""},New record created in users table. Password is bcrypt hashed. All fields match input data.,,,Pass/Fail,
+DB-TC-002,User Login - Password Verification,Authentication,High,Verify password verification works correctly,User exists in database,"1. Attempt login with correct password
+2. Attempt login with wrong password
+3. Check database logs for authentication attempts",Correct: Password123!, Wrong: WrongPassword,Correct password returns success. Wrong password returns failure. Authentication attempts logged.,,,Pass/Fail,
+DB-TC-003,File Upload - Database Record Creation,Data Insertion,High,Verify file upload creates correct database record,User is authenticated,"1. Upload file via API
+2. Check files table for new record
+3. Verify file metadata is stored correctly
+4. Check file path and permissions",File: test.xlsx, Size: 1MB, User ID: 123,New record created in files table. File path, size, and metadata stored correctly. User ownership established.,,,Pass/Fail,
+DB-TC-004,File Processing - Status Updates,Data Updates,High,Verify file processing updates status correctly,File record exists in database,"1. Start file processing
+2. Check status field updates
+3. Monitor processing progress
+4. Verify completion status",Status changes: uploaded → processing → completed,Status field updates correctly. Processing time recorded. Error handling works for failed processing.,,,Pass/Fail,
+DB-TC-005,User Data Retrieval - Dashboard Query,Data Retrieval,High,Verify dashboard data queries work correctly,User has uploaded files,"1. Request dashboard data via API
+2. Check database queries executed
+3. Verify data returned is correct
+4. Check query performance",User ID: 123, Multiple files uploaded,Correct data returned. Queries execute efficiently. No N+1 query problems.,,,Pass/Fail,
+DB-TC-006,Transaction History - Pagination,Data Retrieval,High,Verify pagination works correctly,User has many files,"1. Request file history with pagination
+2. Check database pagination queries
+3. Verify correct page data returned
+4. Test different page sizes",Page: 1, Limit: 10, Total: 25 files,Correct page data returned. Total count accurate. Pagination parameters work correctly.,,,Pass/Fail,
+DB-TC-007,File Search - Database Queries,Data Retrieval,High,Verify file search queries work correctly,User has files with various names,"1. Search files by name
+2. Search files by date range
+3. Search files by status
+4. Check query performance",Search: ""invoice"", Date: 2025-01-01 to 2025-08-01,Correct search results returned. Queries use proper indexing. Performance is acceptable.,,,Pass/Fail,
+DB-TC-008,User Profile Update - Database Update,Data Updates,High,Verify user profile updates work correctly,User exists in database,"1. Update user email via API
+2. Check users table for updated record
+3. Verify old data is not lost
+4. Check update timestamp",New email: new@email.com,Updated record in users table. Old data preserved. Updated_at timestamp changed.,,,Pass/Fail,
+DB-TC-009,Password Change - Database Update,Data Updates,High,Verify password change updates database correctly,User exists in database,"1. Change password via API
+2. Check password hash is updated
+3. Verify old password no longer works
+4. Check password history if implemented",New password: NewPass123!,Password hash updated in database. Old password fails authentication. New password works correctly.,,,Pass/Fail,
+DB-TC-010,File Deletion - Database Cleanup,Data Deletion,High,Verify file deletion removes database records,File exists in database,"1. Delete file via API
+2. Check files table for record removal
+3. Verify file system cleanup
+4. Check related data cleanup",File ID: 456,File record removed from database. File deleted from file system. Related metadata cleaned up.,,,Pass/Fail,
+DB-TC-011,Database Constraints - Unique Email,Data Integrity,High,Verify unique email constraint works,Database has existing users,"1. Try to register user with existing email
+2. Check database constraint violation
+3. Verify proper error handling
+4. Check constraint enforcement",Existing email: john@email.com,Database rejects duplicate email. Proper error message returned. Constraint enforced at database level.,,,Pass/Fail,
+DB-TC-012,Database Constraints - Foreign Keys,Data Integrity,High,Verify foreign key constraints work,Files table has user_id foreign key,"1. Try to create file with non-existent user_id
+2. Try to delete user with existing files
+3. Check constraint violations
+4. Verify cascade behavior",Non-existent user_id: 999,Database rejects invalid foreign key. Proper error handling. Cascade rules work correctly.,,,Pass/Fail,
+DB-TC-013,Database Indexing - Query Performance,Performance,High,Verify database indexes improve query performance,Database has significant data,"1. Run queries without indexes
+2. Create appropriate indexes
+3. Run same queries with indexes
+4. Compare performance",Large dataset: 10,000+ records,Indexed queries significantly faster. Query execution plans optimized. Index usage confirmed.,,,Pass/Fail,
+DB-TC-014,Database Connection Pooling,Performance,High,Verify connection pooling works correctly,Database configured with connection pool,"1. Simulate multiple concurrent users
+2. Monitor connection pool usage
+3. Check connection reuse
+4. Verify pool limits",100 concurrent users,Connection pool handles load efficiently. Connections reused properly. Pool limits enforced correctly.,,,Pass/Fail,
+DB-TC-015,Database Backup - Data Integrity,Backup/Recovery,High,Verify database backup preserves data integrity,Database has test data,"1. Create database backup
+2. Restore backup to test database
+3. Compare original and restored data
+4. Verify data integrity",Test data: users, files, metadata,Backup created successfully. Restored data matches original. No data corruption or loss.,,,Pass/Fail,
+DB-TC-016,Database Recovery - Point in Time,Backup/Recovery,High,Verify point-in-time recovery works,Database has WAL archiving enabled,"1. Perform operations over time
+2. Restore to specific point in time
+3. Verify data state at that time
+4. Check transaction consistency",Operations: insert, update, delete over 1 hour,Recovery to specific timestamp successful. Data state matches expected. Transactions consistent.,,,Pass/Fail,
+DB-TC-017,Database Security - Row Level Security,Security,High,Verify RLS prevents unauthorized access,RLS policies configured,"1. Connect as different users
+2. Try to access other users' data
+3. Check RLS policy enforcement
+4. Verify data isolation",User A tries to access User B's files,RLS prevents unauthorized access. Users can only see their own data. Policies enforced correctly.,,,Pass/Fail,
+DB-TC-018,Database Security - SQL Injection Prevention,Security,High,Verify SQL injection attacks are prevented,Database has input validation,"1. Attempt SQL injection via API
+2. Check database query logs
+3. Verify parameterized queries used
+4. Test various injection payloads",Payload: '; DROP TABLE users; --,SQL injection attempts blocked. Parameterized queries used. No unauthorized database changes.,,,Pass/Fail,
+DB-TC-019,Database Encryption - Data at Rest,Security,High,Verify database encryption works,Database encryption enabled,"1. Check database files encryption
+2. Verify encryption keys management
+3. Test data access with encryption
+4. Check performance impact",Encrypted tables: users, files,Database files encrypted. Encryption keys managed securely. Performance impact acceptable.,,,Pass/Fail,
+DB-TC-020,Database Encryption - Data in Transit,Security,High,Verify SSL/TLS encryption for connections,Database SSL configured,"1. Connect to database with SSL
+2. Check connection encryption
+3. Verify certificate validation
+4. Test non-SSL connection rejection",SSL connection required,SSL connections encrypted. Certificates validated. Non-SSL connections rejected.,,,Pass/Fail,
+DB-TC-021,Database Monitoring - Query Performance,Monitoring,Medium,Verify database monitoring captures performance data,Monitoring tools configured,"1. Execute various queries
+2. Check performance metrics
+3. Verify slow query logging
+4. Monitor resource usage",Queries: select, insert, update, delete,Performance metrics captured. Slow queries logged. Resource usage monitored correctly.,,,Pass/Fail,
+DB-TC-022,Database Monitoring - Connection Monitoring,Monitoring,Medium,Verify connection monitoring works,Database monitoring enabled,"1. Create multiple connections
+2. Monitor connection count
+3. Check connection duration
+4. Verify idle connection cleanup",Multiple concurrent connections,Connection count monitored. Duration tracked. Idle connections cleaned up properly.,,,Pass/Fail,
+DB-TC-023,Database Logging - Audit Trail,Logging,High,Verify database audit logging works,Audit logging enabled,"1. Perform various operations
+2. Check audit logs
+3. Verify log completeness
+4. Test log retention",Operations: login, file upload, data access,Audit logs capture all operations. Log data complete and accurate. Retention policies enforced.,,,Pass/Fail,
+DB-TC-024,Database Logging - Error Logging,Logging,High,Verify database error logging works,Error logging configured,"1. Trigger database errors
+2. Check error logs
+3. Verify error details captured
+4. Test log rotation",Errors: constraint violations, connection failures,Error logs capture all errors. Error details complete. Log rotation works correctly.,,,Pass/Fail,
+DB-TC-025,Database Maintenance - Vacuum Operations,Maintenance,Medium,Verify database maintenance operations work,Database has significant activity,"1. Run VACUUM operation
+2. Check table statistics
+3. Verify bloat reduction
+4. Monitor maintenance performance",Tables: users, files with frequent updates,VACUUM completes successfully. Table statistics updated. Bloat reduced. Performance maintained.,,,Pass/Fail,
+DB-TC-026,Database Maintenance - Index Rebuilding,Maintenance,Medium,Verify index rebuilding works,Database has fragmented indexes,"1. Check index fragmentation
+2. Rebuild indexes
+3. Verify index performance
+4. Check maintenance impact",Indexes: users_email_idx, files_user_id_idx,Indexes rebuilt successfully. Performance improved. Maintenance impact minimal.,,,Pass/Fail,
+DB-TC-027,Database Scalability - Large Dataset,Performance,High,Verify database handles large datasets,Database with large dataset,"1. Test queries on large dataset
+2. Monitor query performance
+3. Check resource usage
+4. Verify scalability",Dataset: 100,000+ records,Queries perform acceptably. Resource usage reasonable. Database scales well with data growth.,,,Pass/Fail,
+DB-TC-028,Database Scalability - Concurrent Users,Performance,High,Verify database handles concurrent users,Database under load,"1. Simulate concurrent users
+2. Monitor database performance
+3. Check connection handling
+4. Verify response times",Concurrent users: 100+,Database handles concurrent load. Connections managed efficiently. Response times acceptable.,,,Pass/Fail,
+DB-TC-029,Database Migration - Schema Changes,Migration,High,Verify database migrations work correctly,Database with existing data,"1. Run migration scripts
+2. Verify schema changes applied
+3. Check data integrity
+4. Test rollback procedures",Migration: add new column, modify constraints,Migration completes successfully. Schema updated correctly. Data integrity maintained. Rollback works.,,,Pass/Fail,
+DB-TC-030,Database Migration - Data Migration,Migration,High,Verify data migration between databases,Source and target databases,"1. Export data from source
+2. Import data to target
+3. Verify data completeness
+4. Check data consistency",Data: users, files, metadata,Data migration successful. All data transferred. Consistency verified. No data loss.,,,Pass/Fail,

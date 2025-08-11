@@ -1,0 +1,90 @@
+Test Case ID,Test Case Name,Test Category,Priority,Test Description,Preconditions,Test Steps,Test Data,Expected Result,Actual Result,Status,Notes
+UI-TC-001,User Registration Form Validation,Form Validation,High,Verify all form fields validate correctly on user registration page,User is on registration page,"1. Navigate to registration page
+2. Leave all fields empty
+3. Click Register button
+4. Fill email with invalid format
+5. Fill password with less than 8 characters
+6. Fill confirm password with different value
+7. Fill all fields with valid data",Invalid email: test@, weak password: 123,Valid data: john@email.com/Password123!,Form shows validation errors for empty fields, invalid email, weak password, and password mismatch. Valid data allows registration.,,,Pass/Fail,
+UI-TC-002,User Login Form Validation,Form Validation,High,Verify login form validates user credentials correctly,User is on login page,"1. Navigate to login page
+2. Leave fields empty and submit
+3. Enter invalid email format
+4. Enter non-existent user credentials
+5. Enter valid credentials",Invalid email: test@, Valid: john@email.com/Password123!,Form shows validation errors. Invalid credentials show error message. Valid credentials redirect to dashboard.,,,Pass/Fail,
+UI-TC-003,Dashboard Page Load,Page Navigation,High,Verify dashboard loads correctly with user data,User is logged in,"1. Login with valid credentials
+2. Wait for dashboard to load
+3. Check all dashboard components
+4. Verify user information display",User credentials,All dashboard components load within 3 seconds. User info, metrics, and navigation are displayed correctly.,,,Pass/Fail,
+UI-TC-004,File Upload Interface,File Operations,High,Verify file upload interface works correctly,User is on file upload page,"1. Navigate to file upload page
+2. Click browse button
+3. Select valid file (XLSX/CSV)
+4. Select invalid file type
+5. Select file larger than 50MB
+6. Upload valid file",Valid: test.xlsx, Invalid: test.txt, Large: 60MB file,File browser opens. Valid files are accepted. Invalid types and large files show error messages. Upload progress is displayed.,,,Pass/Fail,
+UI-TC-005,File Upload Progress,File Operations,Medium,Verify upload progress indicator works,File upload is in progress,"1. Start uploading large file
+2. Monitor progress bar
+3. Check upload percentage
+4. Verify completion status",Large file (>10MB),Progress bar updates in real-time. Percentage shows accurate progress. Completion message appears when done.,,,Pass/Fail,
+UI-TC-006,Transaction History Display,Data Display,High,Verify transaction history shows correctly,User has uploaded files,"1. Navigate to transaction history
+2. Check pagination
+3. Verify sorting options
+4. Test search functionality
+5. Check export options",Search term: ""test"", Sort by: date,History loads within 2 seconds. Pagination works. Sorting changes order. Search filters results. Export downloads file.,,,Pass/Fail,
+UI-TC-007,Search Functionality,Search,High,Verify search works across all data,User is on search page,"1. Enter search term
+2. Select search filters
+3. Click search button
+4. Verify results
+5. Test advanced search",Search: ""invoice"", Filter: date range,Search results appear within 3 seconds. Filters work correctly. Results are relevant and accurate.,,,Pass/Fail,
+UI-TC-008,User Profile Management,User Management,Medium,Verify user can update profile information,User is logged in,"1. Navigate to profile page
+2. Update email address
+3. Change password
+4. Update personal information
+5. Save changes",New email: new@email.com, New password: NewPass123!,Profile updates successfully. Email change requires verification. Password change works immediately.,,,Pass/Fail,
+UI-TC-009,Logout Functionality,Authentication,High,Verify logout works correctly,User is logged in,"1. Click logout button
+2. Confirm logout action
+3. Verify redirect to login page
+4. Try to access protected pages",None,User is logged out. Session is cleared. Redirect to login page. Protected pages require re-authentication.,,,Pass/Fail,
+UI-TC-010,Responsive Design - Desktop,Responsive Design,Medium,Verify UI works on desktop screens,User is on desktop browser,"1. Open application on desktop
+2. Test all pages and components
+3. Check layout and spacing
+4. Verify all functionality",Screen size: 1920x1080,All components display correctly. Layout is optimized for desktop. All functionality works as expected.,,,Pass/Fail,
+UI-TC-011,Responsive Design - Tablet,Responsive Design,Medium,Verify UI works on tablet screens,User is on tablet device,"1. Open application on tablet
+2. Test navigation and menus
+3. Check touch interactions
+4. Verify responsive layout",Screen size: 768x1024,Layout adapts to tablet size. Touch interactions work. Navigation is accessible. All features are functional.,,,Pass/Fail,
+UI-TC-012,Responsive Design - Mobile,Responsive Design,Medium,Verify UI works on mobile screens,User is on mobile device,"1. Open application on mobile
+2. Test mobile navigation
+3. Check touch interactions
+4. Verify mobile-optimized layout",Screen size: 375x667,Layout is mobile-optimized. Touch interactions work smoothly. Navigation is mobile-friendly. All features accessible.,,,Pass/Fail,
+UI-TC-013,Error Message Display,Error Handling,High,Verify error messages display correctly,Application encounters error,"1. Trigger various errors
+2. Check error message display
+3. Verify error message content
+4. Test error recovery",Network error, validation error, server error,Error messages are clear and helpful. User can understand and resolve issues. Recovery options are provided.,,,Pass/Fail,
+UI-TC-014,Loading States,User Experience,Medium,Verify loading states display correctly,Application is processing data,"1. Trigger data loading
+2. Check loading indicators
+3. Verify loading messages
+4. Test loading timeouts",API calls, file uploads, page navigation,Loading indicators appear immediately. Messages are informative. Timeouts are handled gracefully.,,,Pass/Fail,
+UI-TC-015,Accessibility - Keyboard Navigation,Accessibility,Medium,Verify keyboard navigation works,User navigates with keyboard,"1. Use Tab key to navigate
+2. Use Enter key to activate
+3. Use arrow keys for selection
+4. Test keyboard shortcuts",Tab, Enter, Arrow keys,All interactive elements are keyboard accessible. Focus indicators are visible. Keyboard shortcuts work as expected.,,,Pass/Fail,
+UI-TC-016,Accessibility - Screen Reader,Accessibility,Medium,Verify screen reader compatibility,User uses screen reader,"1. Test with screen reader
+2. Check ARIA labels
+3. Verify semantic HTML
+4. Test navigation announcements",Screen reader software,All elements have proper labels. Semantic HTML is used. Navigation is announced correctly. Content is accessible.,,,Pass/Fail,
+UI-TC-017,Browser Compatibility - Chrome,Browser Testing,Medium,Verify application works in Chrome,User is on Chrome browser,"1. Open application in Chrome
+2. Test all functionality
+3. Check for console errors
+4. Verify performance",Chrome version 90+,All features work correctly. No console errors. Performance is acceptable. Layout displays properly.,,,Pass/Fail,
+UI-TC-018,Browser Compatibility - Firefox,Browser Testing,Medium,Verify application works in Firefox,User is on Firefox browser,"1. Open application in Firefox
+2. Test all functionality
+3. Check for console errors
+4. Verify performance",Firefox version 88+,All features work correctly. No console errors. Performance is acceptable. Layout displays properly.,,,Pass/Fail,
+UI-TC-019,Browser Compatibility - Safari,Browser Testing,Medium,Verify application works in Safari,User is on Safari browser,"1. Open application in Safari
+2. Test all functionality
+3. Check for console errors
+4. Verify performance",Safari version 14+,All features work correctly. No console errors. Performance is acceptable. Layout displays properly.,,,Pass/Fail,
+UI-TC-020,Session Timeout Handling,Session Management,High,Verify session timeout works correctly,User session is about to expire,"1. Leave application idle
+2. Wait for session timeout
+3. Try to perform action
+4. Verify redirect to login",Idle time: 30 minutes,Session expires after idle time. User is redirected to login. Session data is cleared. Re-authentication required.,,,Pass/Fail,
