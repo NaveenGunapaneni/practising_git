@@ -4,7 +4,7 @@ A secure, modern web application for file upload and processing with comprehensi
 
 ## 📋 Project Overview
 
-GeoPulse is a full-stack web application designed to provide users with a secure platform for uploading, processing, and managing files (XLSX/CSV formats). The application features robust authentication, real-time processing, and comprehensive transaction history tracking.
+GeoPulse is a comprehensive land monitoring and analysis platform that combines web application capabilities with advanced satellite imagery analysis. The system provides users with a secure platform for uploading, processing, and managing files (XLSX/CSV formats), along with powerful batch property analysis tools for land cover change detection using Sentinel-2 satellite data.
 
 ## 🚀 Key Features
 
@@ -32,6 +32,13 @@ GeoPulse is a full-stack web application designed to provide users with a secure
 - **XSS Protection**: Cross-site scripting prevention
 - **Rate Limiting**: API rate limiting and abuse prevention
 - **Audit Logging**: Complete audit trail for all operations
+
+### 🛰️ Satellite Analysis Features
+- **Batch Property Analysis**: Process multiple properties simultaneously
+- **Land Cover Change Detection**: NDVI, NDBI, and NDWI analysis
+- **Sentinel-2 Integration**: High-resolution satellite imagery processing
+- **Time Series Analysis**: Before/after period comparison
+- **Automated Reporting**: CSV and JSON output with interpretations
 
 ## 🛠️ Technology Stack
 
@@ -68,6 +75,13 @@ GeoPulse is a full-stack web application designed to provide users with a secure
 - **Monitoring**: Application performance monitoring
 - **Logging**: Centralized logging system
 
+### Satellite Analysis & GIS
+- **Satellite Data**: Sentinel-2 L2A imagery
+- **GIS Processing**: Geospatial analysis and mapping
+- **Remote Sensing**: NDVI, NDBI, NDWI calculations
+- **Cloud Processing**: Sentinel Hub integration
+- **Spatial Analysis**: Property boundary and buffer analysis
+
 ## 📁 Project Structure
 
 ```
@@ -98,6 +112,13 @@ GeoPulse/
 │       ├── Test_Cases_UI_Functional.csv
 │       ├── Test_Cases_API_Functional.csv
 │       └── Test_Cases_Database_Functional.csv
+├── src/
+│   └── sample/
+│       ├── batch_property_analyzer.py
+│       ├── BATCH_ANALYSIS_OUTPUT_INTERPRETATION_GUIDE.md
+│       ├── sample_properties.csv
+│       ├── sentinel_hub_config.yml
+│       └── sentinel_hub_user_config.yaml
 ├── Project_Plan_Detailed.md
 ├── Project_Schedule_Trackable.csv
 └── Project_Prompts_Reference.md
@@ -108,7 +129,9 @@ GeoPulse/
 ### Prerequisites
 - Node.js 18+ and npm
 - PostgreSQL 15+
+- Python 3.8+ (for satellite analysis)
 - Git
+- Sentinel Hub account (for satellite data access)
 
 ### Installation
 
@@ -166,6 +189,19 @@ GeoPulse/
    - Backend API: http://localhost:3001
    - API Documentation: http://localhost:3001/api-docs
 
+7. **Run Satellite Analysis (Optional)**
+   ```bash
+   # Navigate to satellite analysis directory
+   cd src/sample
+   
+   # Run batch property analysis
+   python batch_property_analyzer.py --input sample_properties.csv \
+     --main-config sentinel_hub_config.yml \
+     --user-config sentinel_hub_user_config.yaml \
+     --before-start 2023-01-01 --before-end 2023-06-30 \
+     --after-start 2023-07-01 --after-end 2023-12-31
+   ```
+
 ## 📊 API Endpoints
 
 ### Authentication
@@ -191,6 +227,12 @@ GeoPulse/
 - `GET /api/dashboard` - Get dashboard data
 - `GET /api/metrics` - Get user metrics
 
+### Satellite Analysis (Python API)
+- `batch_property_analyzer.py` - Batch property analysis tool
+- Input: CSV with property coordinates (latitude, longitude, extent)
+- Output: Land cover change analysis (NDVI, NDBI, NDWI)
+- Time periods: Before/after comparison with customizable dates
+
 ## 🧪 Testing
 
 ### Run Tests
@@ -212,6 +254,7 @@ npm run test:e2e
 - **UI Testing**: 90% component coverage
 - **Database Testing**: 100% critical path coverage
 - **Security Testing**: 100% vulnerability coverage
+- **Satellite Analysis**: Land cover change detection validation
 
 ## 📈 Performance
 
@@ -221,6 +264,8 @@ npm run test:e2e
 - **File Upload**: Up to 50MB
 - **Concurrent Users**: 100+ users
 - **Database Queries**: Optimized with proper indexing
+- **Satellite Analysis**: 5-10 properties per minute
+- **Image Processing**: 10m resolution Sentinel-2 data
 
 ### Monitoring
 - Application performance monitoring
@@ -268,6 +313,7 @@ CORS_ORIGIN=https://your-domain.com
 - **Technical Specifications**: `design/API/` and `design/UI/`
 - **Database Design**: `design/Database/`
 - **Testing Documentation**: `design/Testing/`
+- **Satellite Analysis Guide**: `src/sample/BATCH_ANALYSIS_OUTPUT_INTERPRETATION_GUIDE.md`
 - **Project Plan**: `Project_Plan_Detailed.md`
 - **Project Schedule**: `Project_Schedule_Trackable.csv`
 
@@ -278,6 +324,7 @@ CORS_ORIGIN=https://your-domain.com
 - **API Developers**: 2 developers
 - **Database Administrator**: 1 developer
 - **QA Engineer**: 1 developer
+- **GIS/Satellite Analyst**: 1 developer
 - **Project Manager**: 1 manager
 
 ### Roles & Responsibilities
@@ -285,6 +332,7 @@ CORS_ORIGIN=https://your-domain.com
 - **API Team**: Backend development, API design, security implementation
 - **DBA**: Database design, optimization, security, backup/recovery
 - **QA Team**: Testing strategy, test execution, quality assurance
+- **GIS Team**: Satellite data processing, land cover analysis, geospatial solutions
 
 ## 📅 Project Timeline
 
@@ -337,6 +385,8 @@ This project is proprietary software. All rights reserved.
 - User authentication and authorization
 - File upload and processing
 - Dashboard and transaction history
+- Batch property analysis with satellite imagery
+- Land cover change detection (NDVI, NDBI, NDWI)
 - Comprehensive security features
 - Production deployment ready
 
