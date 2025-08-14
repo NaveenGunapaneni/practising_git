@@ -1,0 +1,2136 @@
+{
+    "info": {
+        "_postman_id": "geopulse-complete-api-tests-2025",
+        "name": "GeoPulse Complete API Tests",
+        "description": "Complete test suite for all GeoPulse APIs with success and failure scenarios",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "User Registration API",
+            "description": "API-1: User registration with validation scenarios",
+            "item": [
+                {
+                    "name": "Success Cases",
+                    "item": [
+                        {
+                            "name": "Register New User Successfully",
+                            "event": [
+                                {
+                                    "listen": "prerequest",
+                                    "script": {
+                                        "exec": [
+                                            "pm.environment.set('unique_email', `test_${Date.now()}@example.com`);"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                },
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Registration successful', () => {",
+                                            "    pm.response.to.have.status(201);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('success');",
+                                            "    pm.expect(data.data.user_id).to.be.a('number');",
+                                            "    pm.environment.set('user_id', data.data.user_id);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"organization_name\": \"Test Corporation\",\n    \"user_name\": \"Test User\",\n    \"contact_phone\": \"+1-555-123-4567\",\n    \"email\": \"{{unique_email}}\",\n    \"password\": \"SecurePassword123!\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/auth/register",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "register"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Register User with Logo Path",
+                            "event": [
+                                {
+                                    "listen": "prerequest",
+                                    "script": {
+                                        "exec": [
+                                            "pm.environment.set('unique_email_logo', `test_logo_${Date.now()}@example.com`);"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                },
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Registration with logo successful', () => {",
+                                            "    pm.response.to.have.status(201);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('success');",
+                                            "    pm.expect(data.data.logo_path).to.eql('/uploads/logos/test_logo.png');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"organization_name\": \"Logo Test Corp\",\n    \"user_name\": \"Logo Test User\",\n    \"contact_phone\": \"+1-555-987-6543\",\n    \"email\": \"{{unique_email_logo}}\",\n    \"password\": \"SecurePassword123!\",\n    \"logo_path\": \"/uploads/logos/test_logo.png\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/auth/register",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "register"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Failure Cases",
+                    "item": [
+                        {
+                            "name": "Duplicate Email Registration",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Duplicate email rejected', () => {",
+                                            "    pm.response.to.have.status(400);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E007');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"organization_name\": \"Test Corporation\",\n    \"user_name\": \"Test User\",\n    \"contact_phone\": \"+1-555-123-4567\",\n    \"email\": \"{{unique_email}}\",\n    \"password\": \"SecurePassword123!\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/auth/register",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "register"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Invalid Email Format",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Invalid email format rejected', () => {",
+                                            "    pm.response.to.have.status(422);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E007');",
+                                            "    pm.expect(data.message).to.include('Invalid input data');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"organization_name\": \"Test Corporation\",\n    \"user_name\": \"Test User\",\n    \"contact_phone\": \"+1-555-123-4567\",\n    \"email\": \"invalid-email\",\n    \"password\": \"SecurePassword123!\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/auth/register",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "register"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Missing Required Fields",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Missing required fields rejected', () => {",
+                                            "    pm.response.to.have.status(422);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E007');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"organization_name\": \"Test Corporation\",\n    \"user_name\": \"Test User\",\n    \"contact_phone\": \"+1-555-123-4567\",\n    \"password\": \"SecurePassword123!\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/auth/register",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "register"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Weak Password",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Weak password rejected', () => {",
+                                            "    pm.response.to.have.status(422);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E007');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"organization_name\": \"Test Corporation\",\n    \"user_name\": \"Test User\",\n    \"contact_phone\": \"+1-555-123-4567\",\n    \"email\": \"test_weak@example.com\",\n    \"password\": \"123\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/auth/register",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "register"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Invalid Phone Format",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Invalid phone format rejected', () => {",
+                                            "    pm.response.to.have.status(422);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E007');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"organization_name\": \"Test Corporation\",\n    \"user_name\": \"Test User\",\n    \"contact_phone\": \"123\",\n    \"email\": \"test_phone@example.com\",\n    \"password\": \"SecurePassword123!\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/auth/register",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "register"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "User Authentication API",
+            "description": "API-2: User login and authentication",
+            "item": [
+                {
+                    "name": "Success Cases",
+                    "item": [
+                        {
+                            "name": "Login User Successfully",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Login successful', () => {",
+                                            "    pm.response.to.have.status(200);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.data.access_token).to.be.a('string');",
+                                            "    pm.expect(data.data.token_type).to.eql('bearer');",
+                                            "    pm.expect(data.data.expires_in).to.eql(1800);",
+                                            "    pm.expect(data.data.user).to.have.property('user_id');",
+                                            "    pm.environment.set('auth_token', data.data.access_token);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/x-www-form-urlencoded"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "urlencoded",
+                                    "urlencoded": [
+                                        {
+                                            "key": "username",
+                                            "value": "{{unique_email}}",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "password",
+                                            "value": "SecurePassword123!",
+                                            "type": "text"
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/auth/login",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "login"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Login with JSON Format",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('JSON login successful', () => {",
+                                            "    pm.response.to.have.status(200);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.data.access_token).to.be.a('string');",
+                                            "    pm.expect(data.data.token_type).to.eql('bearer');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"username\": \"{{unique_email}}\",\n    \"password\": \"SecurePassword123!\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/auth/login",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "login"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Failure Cases",
+                    "item": [
+                        {
+                            "name": "Invalid Password Login",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Invalid password rejected', () => {",
+                                            "    pm.response.to.have.status(401);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E004');",
+                                            "    pm.expect(data.message).to.include('Invalid credentials');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/x-www-form-urlencoded"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "urlencoded",
+                                    "urlencoded": [
+                                        {
+                                            "key": "username",
+                                            "value": "{{unique_email}}",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "password",
+                                            "value": "WrongPassword",
+                                            "type": "text"
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/auth/login",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "login"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Non-existent User Login",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Non-existent user rejected', () => {",
+                                            "    pm.response.to.have.status(401);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E004');",
+                                            "    pm.expect(data.message).to.include('Invalid credentials');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/x-www-form-urlencoded"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "urlencoded",
+                                    "urlencoded": [
+                                        {
+                                            "key": "username",
+                                            "value": "nonexistent@example.com",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "password",
+                                            "value": "SomePassword123!",
+                                            "type": "text"
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/auth/login",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "login"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Invalid Email Format Login",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Invalid email format rejected', () => {",
+                                            "    pm.response.to.have.status(422);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E007');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/x-www-form-urlencoded"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "urlencoded",
+                                    "urlencoded": [
+                                        {
+                                            "key": "username",
+                                            "value": "invalid-email",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "password",
+                                            "value": "SomePassword123!",
+                                            "type": "text"
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/auth/login",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "login"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Missing Password Login",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Missing password rejected', () => {",
+                                            "    pm.response.to.have.status(422);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E007');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/x-www-form-urlencoded"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "urlencoded",
+                                    "urlencoded": [
+                                        {
+                                            "key": "username",
+                                            "value": "{{unique_email}}",
+                                            "type": "text"
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/auth/login",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "login"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Account Lockout Test (Multiple Failed Attempts)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Multiple failed attempts handled', () => {",
+                                            "    // This test simulates the 5th failed attempt",
+                                            "    // In real scenario, account should be locked after 5 attempts",
+                                            "    pm.expect(pm.response.code).to.be.oneOf([401, 429]);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E004');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/x-www-form-urlencoded"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "urlencoded",
+                                    "urlencoded": [
+                                        {
+                                            "key": "username",
+                                            "value": "{{unique_email}}",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "password",
+                                            "value": "WrongPassword",
+                                            "type": "text"
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/auth/login",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "login"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Dashboard Data API",
+            "description": "API-3: Dashboard data retrieval with filtering and pagination",
+            "item": [
+                {
+                    "name": "Success Cases",
+                    "item": [
+                        {
+                            "name": "Get Dashboard Data",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Dashboard data retrieved', () => {",
+                                            "    pm.response.to.have.status(200);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.data).to.have.property('user');",
+                                            "    pm.expect(data.data).to.have.property('files');",
+                                            "    pm.expect(data.data).to.have.property('metrics');",
+                                            "    pm.expect(data.data).to.have.property('pagination');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/dashboard",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "dashboard"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Dashboard with Pagination",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Pagination works', () => {",
+                                            "    pm.response.to.have.status(200);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.data.pagination.items_per_page).to.eql(5);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/dashboard?limit=5",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "dashboard"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "limit",
+                                            "value": "5"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Dashboard with Sorting by Filename",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Sorting by filename works', () => {",
+                                            "    pm.response.to.have.status(200);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.data.files).to.be.an('array');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/dashboard?sort_by=filename&sort_order=asc",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "dashboard"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "sort_by",
+                                            "value": "filename"
+                                        },
+                                        {
+                                            "key": "sort_order",
+                                            "value": "asc"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Dashboard Filter by Processed Status",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Filter by processed status works', () => {",
+                                            "    pm.response.to.have.status(200);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.data.files).to.be.an('array');",
+                                            "    // Verify all returned files are processed",
+                                            "    data.data.files.forEach(file => {",
+                                            "        pm.expect(file.processed_flag).to.be.true;",
+                                            "    });",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/dashboard?status=processed",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "dashboard"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "status",
+                                            "value": "processed"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Dashboard Filter by Pending Status",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Filter by pending status works', () => {",
+                                            "    pm.response.to.have.status(200);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.data.files).to.be.an('array');",
+                                            "    // Verify all returned files are pending",
+                                            "    data.data.files.forEach(file => {",
+                                            "        pm.expect(file.processed_flag).to.be.false;",
+                                            "    });",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/dashboard?status=pending",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "dashboard"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "status",
+                                            "value": "pending"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Dashboard with Complex Query Parameters",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Complex query parameters work', () => {",
+                                            "    pm.response.to.have.status(200);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.data.pagination.items_per_page).to.eql(10);",
+                                            "    pm.expect(data.data.files).to.be.an('array');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/dashboard?limit=10&offset=5&sort_by=engagement_name&sort_order=desc&status=all",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "dashboard"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "limit",
+                                            "value": "10"
+                                        },
+                                        {
+                                            "key": "offset",
+                                            "value": "5"
+                                        },
+                                        {
+                                            "key": "sort_by",
+                                            "value": "engagement_name"
+                                        },
+                                        {
+                                            "key": "sort_order",
+                                            "value": "desc"
+                                        },
+                                        {
+                                            "key": "status",
+                                            "value": "all"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Failure Cases",
+                    "item": [
+                        {
+                            "name": "Unauthorized Dashboard Access",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Unauthorized access rejected', () => {",
+                                            "    pm.response.to.have.status(401);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E004');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/dashboard",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "dashboard"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Invalid Token Dashboard Access",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Invalid token rejected', () => {",
+                                            "    pm.response.to.have.status(401);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E004');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer invalid_token_here"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/dashboard",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "dashboard"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Invalid Query Parameters",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Invalid parameters rejected', () => {",
+                                            "    pm.response.to.have.status(422);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E007');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/dashboard?limit=1000&sort_by=invalid_field",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "dashboard"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "limit",
+                                            "value": "1000"
+                                        },
+                                        {
+                                            "key": "sort_by",
+                                            "value": "invalid_field"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Invalid Status Filter",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Invalid status filter rejected', () => {",
+                                            "    pm.response.to.have.status(422);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E007');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/dashboard?status=invalid_status",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "dashboard"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "status",
+                                            "value": "invalid_status"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Invalid Sort Order",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Invalid sort order rejected', () => {",
+                                            "    pm.response.to.have.status(422);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E007');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/dashboard?sort_order=invalid_order",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "dashboard"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "sort_order",
+                                            "value": "invalid_order"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "File Upload Processing API",
+            "description": "API-4: File upload, processing, and management",
+            "item": [
+                {
+                    "name": "Success Cases",
+                    "item": [
+                        {
+                            "name": "Upload CSV File Successfully",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('CSV file uploaded successfully', () => {",
+                                            "    pm.response.to.have.status(200);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('success');",
+                                            "    pm.expect(data.data.file_id).to.be.a('number');",
+                                            "    pm.expect(data.data.processed_flag).to.be.true;",
+                                            "    pm.expect(data.data.engagement_name).to.eql('Test Engagement');",
+                                            "    pm.expect(data.data.storage_location).to.be.a('string');",
+                                            "    pm.expect(data.data.input_location).to.be.a('string');",
+                                            "    pm.expect(data.data.processing_time_seconds).to.be.a('number');",
+                                            "    pm.expect(data.data.file_size_mb).to.be.a('number');",
+                                            "    pm.expect(data.data.dates).to.be.an('array');",
+                                            "    pm.expect(data.data.dates).to.have.lengthOf(4);",
+                                            "    pm.environment.set('file_id', data.data.file_id);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "file",
+                                            "type": "file",
+                                            "src": "sample_properties_for_geopulse.csv"
+                                        },
+                                        {
+                                            "key": "engagement_name",
+                                            "value": "Test Engagement",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date1",
+                                            "value": "2025-01-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date2",
+                                            "value": "2025-02-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date3",
+                                            "value": "2025-03-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date4",
+                                            "value": "2025-04-15",
+                                            "type": "text"
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/files/upload",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "files",
+                                        "upload"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get File Processing Status",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('File status retrieved successfully', () => {",
+                                            "    pm.response.to.have.status(200);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('success');",
+                                            "    pm.expect(data.data).to.have.property('file_id');",
+                                            "    pm.expect(data.data).to.have.property('filename');",
+                                            "    pm.expect(data.data).to.have.property('processed_flag');",
+                                            "    pm.expect(data.data).to.have.property('storage_location');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/files/status/{{file_id}}",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "files",
+                                        "status",
+                                        "{{file_id}}"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get User Files List",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Files list retrieved successfully', () => {",
+                                            "    pm.response.to.have.status(200);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('success');",
+                                            "    pm.expect(data.data).to.be.an('array');",
+                                            "    // Verify each file has required properties",
+                                            "    if (data.data.length > 0) {",
+                                            "        data.data.forEach(file => {",
+                                            "            pm.expect(file).to.have.property('file_id');",
+                                            "            pm.expect(file).to.have.property('filename');",
+                                            "            pm.expect(file).to.have.property('engagement_name');",
+                                            "            pm.expect(file).to.have.property('processed_flag');",
+                                            "            pm.expect(file).to.have.property('upload_date');",
+                                            "        });",
+                                            "    }",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/files/list",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "files",
+                                        "list"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Upload XLSX File Successfully",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('XLSX file uploaded successfully', () => {",
+                                            "    pm.response.to.have.status(200);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.data.file_id).to.be.a('number');",
+                                            "    pm.expect(data.data.processed_flag).to.be.true;",
+                                            "    pm.expect(data.data.processing_time_seconds).to.be.a('number');",
+                                            "    pm.expect(data.data.line_count).to.be.a('number');",
+                                            "    pm.environment.set('xlsx_file_id', data.data.file_id);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "file",
+                                            "type": "file",
+                                            "src": "test_data.xlsx"
+                                        },
+                                        {
+                                            "key": "engagement_name",
+                                            "value": "XLSX Test Engagement",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date1",
+                                            "value": "2025-01-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date2",
+                                            "value": "2025-02-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date3",
+                                            "value": "2025-03-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date4",
+                                            "value": "2025-04-15",
+                                            "type": "text"
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/files/upload",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "files",
+                                        "upload"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Upload Large File Successfully",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Large file uploaded successfully', () => {",
+                                            "    pm.response.to.have.status(200);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.data.file_id).to.be.a('number');",
+                                            "    pm.expect(data.data.file_size_mb).to.be.greaterThan(1);",
+                                            "    pm.expect(data.data.processing_time_seconds).to.be.greaterThan(0);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "file",
+                                            "type": "file",
+                                            "src": "large_test_file.csv"
+                                        },
+                                        {
+                                            "key": "engagement_name",
+                                            "value": "Large File Test Engagement",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date1",
+                                            "value": "2025-01-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date2",
+                                            "value": "2025-02-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date3",
+                                            "value": "2025-03-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date4",
+                                            "value": "2025-04-15",
+                                            "type": "text"
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/files/upload",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "files",
+                                        "upload"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Failure Cases",
+                    "item": [
+                        {
+                            "name": "Unauthorized File Upload",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Unauthorized upload rejected', () => {",
+                                            "    pm.response.to.have.status(401);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E004');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "file",
+                                            "type": "file",
+                                            "src": "sample_properties_for_geopulse.csv"
+                                        },
+                                        {
+                                            "key": "engagement_name",
+                                            "value": "Test Engagement",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date1",
+                                            "value": "2025-01-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date2",
+                                            "value": "2025-02-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date3",
+                                            "value": "2025-03-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date4",
+                                            "value": "2025-04-15",
+                                            "type": "text"
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/files/upload",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "files",
+                                        "upload"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Invalid File Format Upload",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Invalid file format rejected', () => {",
+                                            "    pm.response.to.have.status(400);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E001');",
+                                            "    pm.expect(data.message).to.include('Invalid file format');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "file",
+                                            "type": "file",
+                                            "src": "invalid_file.pdf"
+                                        },
+                                        {
+                                            "key": "engagement_name",
+                                            "value": "Invalid Format Test",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date1",
+                                            "value": "2025-01-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date2",
+                                            "value": "2025-02-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date3",
+                                            "value": "2025-03-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date4",
+                                            "value": "2025-04-15",
+                                            "type": "text"
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/files/upload",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "files",
+                                        "upload"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "File Too Large Upload",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('File too large rejected', () => {",
+                                            "    pm.response.to.have.status(413);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E002');",
+                                            "    pm.expect(data.message).to.include('File size exceeds maximum limit');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "file",
+                                            "type": "file",
+                                            "src": "very_large_file.csv"
+                                        },
+                                        {
+                                            "key": "engagement_name",
+                                            "value": "Large File Test",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date1",
+                                            "value": "2025-01-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date2",
+                                            "value": "2025-02-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date3",
+                                            "value": "2025-03-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date4",
+                                            "value": "2025-04-15",
+                                            "type": "text"
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/files/upload",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "files",
+                                        "upload"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Missing Required Fields Upload",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Missing required fields rejected', () => {",
+                                            "    pm.response.to.have.status(422);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E007');",
+                                            "    pm.expect(data.message).to.include('Invalid input data');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "file",
+                                            "type": "file",
+                                            "src": "sample_properties_for_geopulse.csv"
+                                        },
+                                        {
+                                            "key": "date1",
+                                            "value": "2025-01-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date2",
+                                            "value": "2025-02-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date3",
+                                            "value": "2025-03-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date4",
+                                            "value": "2025-04-15",
+                                            "type": "text"
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/files/upload",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "files",
+                                        "upload"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Invalid Date Format Upload",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Invalid date format rejected', () => {",
+                                            "    pm.response.to.have.status(422);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E007');",
+                                            "    pm.expect(data.message).to.include('Invalid input data');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "file",
+                                            "type": "file",
+                                            "src": "sample_properties_for_geopulse.csv"
+                                        },
+                                        {
+                                            "key": "engagement_name",
+                                            "value": "Invalid Date Test",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date1",
+                                            "value": "2025/01/15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date2",
+                                            "value": "invalid-date",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date3",
+                                            "value": "2025-03-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date4",
+                                            "value": "2025-04-15",
+                                            "type": "text"
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/files/upload",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "files",
+                                        "upload"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Missing File Upload",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Missing file rejected', () => {",
+                                            "    pm.response.to.have.status(422);",
+                                            "    const data = pm.response.json();",
+                                            "    pm.expect(data.status).to.eql('error');",
+                                            "    pm.expect(data.error_code).to.eql('E007');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "engagement_name",
+                                            "value": "No File Test",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date1",
+                                            "value": "2025-01-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date2",
+                                            "value": "2025-02-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date3",
+                                            "value": "2025-03-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date4",
+                                            "value": "2025-04-15",
+                                            "type": "text"
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/files/upload",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "files",
+                                        "upload"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Processing Timeout Test",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Processing timeout handled', () => {",
+                                            "    // This test simulates a processing timeout scenario",
+                                            "    pm.expect(pm.response.code).to.be.oneOf([200, 500]);",
+                                            "    if (pm.response.code === 500) {",
+                                            "        const data = pm.response.json();",
+                                            "        pm.expect(data.status).to.eql('error');",
+                                            "        pm.expect(data.error_code).to.eql('E005');",
+                                            "        pm.expect(data.message).to.include('File processing failed');",
+                                            "    }",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{auth_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "file",
+                                            "type": "file",
+                                            "src": "extremely_large_file.csv"
+                                        },
+                                        {
+                                            "key": "engagement_name",
+                                            "value": "Timeout Test Engagement",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date1",
+                                            "value": "2025-01-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date2",
+                                            "value": "2025-02-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date3",
+                                            "value": "2025-03-15",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "date4",
+                                            "value": "2025-04-15",
+                                            "type": "text"
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/v1/files/upload",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "files",
+                                        "upload"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://127.0.0.1:8000"
+        }
+    ]
+}
