@@ -93,6 +93,9 @@ class FileValidator:
     async def _validate_mime_type(self, file: UploadFile) -> None:
         """Validate MIME type using python-magic if available, otherwise use content-type header."""
         try:
+            # Get file extension for additional validation
+            file_extension = Path(file.filename).suffix.lower()
+            
             if HAS_MAGIC:
                 # Read first 2048 bytes for MIME type detection
                 content = await file.read(2048)
@@ -101,10 +104,23 @@ class FileValidator:
                 # Detect MIME type
                 mime_type = magic.from_buffer(content, mime=True)
                 
+                # Special handling for CSV files which might be detected as text/plain
+                if file_extension == '.csv' and mime_type in ['text/plain', 'application/octet-stream']:
+                    # For CSV files, check if content looks like CSV
+                    content_str = content.decode('utf-8', errors='ignore')
+                    if ',' in content_str or ';' in content_str:
+                        logger.debug(f"CSV file detected by extension and content validation: {file.filename}")
+                        return  # Accept CSV file
+                
                 # Check if MIME type is allowed
                 if mime_type not in self.allowed_mime_types:
                     # Also check the content-type header as fallback
                     if file.content_type not in self.allowed_mime_types:
+                        # Special case for CSV files with generic MIME types
+                        if file_extension == '.csv' and mime_type in ['text/plain', 'application/octet-stream']:
+                            logger.debug(f"Accepting CSV file with generic MIME type: {mime_type}")
+                            return
+                        
                         raise FileUploadException(
                             f"Invalid file type. Detected MIME type: {mime_type}. "
                             f"Allowed types: {', '.join(self.allowed_mime_types)}",
@@ -115,6 +131,12 @@ class FileValidator:
             else:
                 # Fallback to content-type header when python-magic is not available
                 logger.debug("python-magic not available, using content-type header for validation")
+                
+                # Special handling for CSV files
+                if file_extension == '.csv' and file.content_type in ['application/octet-stream', 'text/plain']:
+                    logger.debug(f"Accepting CSV file with generic content-type: {file.content_type}")
+                    return
+                
                 if file.content_type not in self.allowed_mime_types:
                     raise FileUploadException(
                         f"Invalid file type. Content-Type: {file.content_type}. "
@@ -128,6 +150,12 @@ class FileValidator:
             if isinstance(e, FileUploadException):
                 raise
             logger.warning(f"MIME type validation failed, using content-type header: {str(e)}")
+            
+            # Final fallback - be more lenient with CSV files
+            file_extension = Path(file.filename).suffix.lower()
+            if file_extension == '.csv':
+                logger.debug(f"Accepting CSV file based on extension: {file.filename}")
+                return
             
             # Final fallback to content-type header
             if file.content_type not in self.allowed_mime_types:

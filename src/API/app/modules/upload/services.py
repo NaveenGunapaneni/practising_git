@@ -12,6 +12,7 @@ from app.modules.upload.repository import UploadRepository
 from app.modules.upload.processors.core_processor import CoreFileProcessor
 from app.modules.upload.processors.geospatial_processor import GeospatialProcessor
 from app.modules.upload.processors.file_validator import FileValidator
+from app.modules.upload.processors.excel_formatter import format_environmental_analysis_excel
 from app.modules.upload.schemas import FileUploadRequest, FileUploadData
 from app.config import settings
 from app.core.exceptions import FileUploadException, FileProcessingException, StorageException
@@ -50,10 +51,11 @@ class UploadService:
             raise StorageException(f"Failed to create directories: {str(e)}")
     
     def _create_user_directories(self, user_id: int, upload_date: date) -> tuple[Path, Path]:
-        """Create user-specific directory structure."""
+        """Create user-specific directory structure with timestamp for unique transactions."""
         try:
-            date_str = upload_date.strftime("%Y-%m-%d")
-            user_dir = self.upload_dir / str(user_id) / date_str
+            # Create timestamp-based directory for unique transactions
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            user_dir = self.upload_dir / str(user_id) / timestamp
             
             input_dir = user_dir / "input"
             output_dir = user_dir / "output"
@@ -207,6 +209,18 @@ class UploadService:
                         dates=[request.date1, request.date2, request.date3, request.date4],
                         engagement_name=request.engagement_name
                     )
+                
+                # Create formatted Excel file if output is CSV
+                if output_path.suffix.lower() == '.csv':
+                    try:
+                        logger.info(f"Creating formatted Excel file from: {output_path}")
+                        excel_path = format_environmental_analysis_excel(output_path)
+                        logger.info(f"Formatted Excel file created: {excel_path}")
+                        # Update output_path to point to the Excel file for database storage
+                        output_path = excel_path
+                    except Exception as e:
+                        logger.warning(f"Failed to create formatted Excel file: {str(e)}")
+                        # Continue with CSV file if Excel formatting fails
                 
                 processing_time = time.time() - processing_start
                 

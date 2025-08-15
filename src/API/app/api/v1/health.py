@@ -1,10 +1,9 @@
 """Health check endpoints."""
 
 from datetime import datetime
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter
 
-from app.core.database import get_db_session, check_database_connection
+from app.core.database import check_database_connection
 from app.config import settings
 from pathlib import Path
 
@@ -39,7 +38,7 @@ async def health_check():
 
 
 @router.get("/health/detailed")
-async def detailed_health_check(db: AsyncSession = Depends(get_db_session)):
+async def detailed_health_check():
     """Detailed health check with database and file system status."""
     
     # Check database connection

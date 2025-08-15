@@ -1,0 +1,10 @@
+{
+  "user_id": 3,
+  "organization_name": "Test Organization",
+  "user_name": "John Doe",
+  "contact_phone": "+1-555-0123",
+  "email": "testuser@gmail.com",
+  "logo_path": "/defaults/datalegos.png",
+  "registration_date": "2025-08-15T10:32:31.073899+00:00",
+  "file_count": 0
+}

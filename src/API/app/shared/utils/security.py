@@ -97,14 +97,27 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         )
         
         # Extract user_id from token
-        user_id = payload.get("sub")
-        if user_id is None:
+        user_id_str = payload.get("sub")
+        if user_id_str is None:
             raise HTTPException(
                 status_code=401,
                 detail={
                     "status": "error",
                     "error_code": "E004",
                     "message": "Invalid token payload"
+                }
+            )
+        
+        # Convert string user_id back to integer
+        try:
+            user_id = int(user_id_str)
+        except (ValueError, TypeError):
+            raise HTTPException(
+                status_code=401,
+                detail={
+                    "status": "error",
+                    "error_code": "E004",
+                    "message": "Invalid user ID in token"
                 }
             )
         

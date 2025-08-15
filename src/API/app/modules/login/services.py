@@ -170,7 +170,7 @@ class LoginService:
             
             # Create token payload
             payload = {
-                "sub": user.user_id,
+                "sub": str(user.user_id),  # Convert to string for JWT standard compliance
                 "email": user.email,
                 "role": "user",
                 "iat": int(now.timestamp()),
