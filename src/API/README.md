@@ -19,7 +19,7 @@ A FastAPI-based user registration and management system with secure authenticati
 ### Prerequisites
 
 - Python 3.11+
-- PostgreSQL 15+
+- Docker and Docker Compose
 - pip or poetry for dependency management
 
 ### Installation
@@ -37,19 +37,19 @@ pip install -e .
 
 3. Set up environment variables:
 ```bash
-cp .env.example .env
-# Edit .env with your configuration
+# .env file is already created with default values
+# Edit .env if you need to customize configuration
 ```
 
-4. Set up PostgreSQL database:
+4. Start the PostgreSQL database with Docker:
 ```bash
-# Create database and user using setup_postgres.sql
-psql -U postgres -f setup_postgres.sql
+cd database
+docker-compose up -d
 ```
 
-5. Run database migrations:
+5. Verify database is running:
 ```bash
-alembic upgrade head
+docker-compose ps
 ```
 
 6. Start the server:
@@ -58,6 +58,40 @@ python main.py
 ```
 
 The API will be available at `http://localhost:8000`
+
+## Database Management
+
+### pgAdmin Web Interface
+Access the database through pgAdmin at: **http://localhost:8080**
+
+**Login Credentials:**
+- Email: `admin@geopulse.com`
+- Password: `admin123`
+
+**Database Connection Details:**
+- Host: `postgres` (in pgAdmin) or `localhost` (from host machine)
+- Port: `5432`
+- Database: `geopulse_db`
+- Username: `geopulse_user`
+- Password: `password123`
+
+### Command Line Access
+```bash
+cd database
+docker-compose exec postgres psql -U geopulse_user -d geopulse_db
+```
+
+### Database Management Commands
+```bash
+# Stop database
+docker-compose down
+
+# Stop and remove all data
+docker-compose down -v
+
+# View logs
+docker-compose logs postgres
+```
 
 ## API Documentation
 
@@ -135,13 +169,21 @@ LOG_FILE=./logs/api.log
 pytest
 ```
 
-### Database Migrations
+### Database Operations
 ```bash
-# Create new migration
-alembic revision --autogenerate -m "description"
+# Database is automatically initialized with Docker
+# Tables are created via setup_postgres.sql on first startup
 
-# Apply migrations
+# For manual migrations (if needed):
+alembic revision --autogenerate -m "description"
 alembic upgrade head
+
+# Backup database
+cd database
+docker-compose exec postgres pg_dump -U geopulse_user geopulse_db > backup.sql
+
+# Restore database
+docker-compose exec -T postgres psql -U geopulse_user geopulse_db < backup.sql
 ```
 
 ### Code Quality
