@@ -15,6 +15,8 @@ const RegisterPage = () => {
     email: '',
     password: '',
     confirmPassword: '',
+    organizationName: '',
+    contactPhone: '',
     agreeToTerms: false
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -72,6 +74,8 @@ const RegisterPage = () => {
       formData.fullName.trim() !== '' &&
       formData.email !== '' &&
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
+      formData.organizationName.trim() !== '' &&
+      formData.contactPhone.trim() !== '' &&
       passwordValidation.hasMinLength &&
       passwordValidation.hasUppercase &&
       passwordValidation.hasLowercase &&
@@ -92,6 +96,16 @@ const RegisterPage = () => {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Invalid email format';
+    }
+
+    if (!formData.organizationName.trim()) {
+      newErrors.organizationName = 'Organization name is required';
+    }
+
+    if (!formData.contactPhone.trim()) {
+      newErrors.contactPhone = 'Contact phone is required';
+    } else if (!/^[\+]?[1-9][\d]{0,15}$/.test(formData.contactPhone.replace(/[\s\-\(\)]/g, ''))) {
+      newErrors.contactPhone = 'Invalid phone number format';
     }
 
     if (!formData.password) {
@@ -126,9 +140,11 @@ const RegisterPage = () => {
 
     try {
       await register({
-        full_name: formData.fullName,
+        user_name: formData.fullName,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        organization_name: formData.organizationName,
+        contact_phone: formData.contactPhone
       });
       
       showNotification('Registration successful! Please check your email to verify your account.', 'success');
@@ -192,6 +208,50 @@ const RegisterPage = () => {
             {errors.email && (
               <div className="error-message" role="alert">
                 {errors.email}
+              </div>
+            )}
+          </div>
+
+          {/* Organization Name Field */}
+          <div className="form-group">
+            <div className="input-wrapper">
+              <input
+                type="text"
+                id="organizationName"
+                name="organizationName"
+                value={formData.organizationName}
+                onChange={handleInputChange}
+                className={`form-input ${errors.organizationName ? 'error' : ''}`}
+                placeholder="ORGANIZATION NAME"
+                data-testid="organization-input"
+                autoComplete="organization"
+              />
+            </div>
+            {errors.organizationName && (
+              <div className="error-message" role="alert">
+                {errors.organizationName}
+              </div>
+            )}
+          </div>
+
+          {/* Contact Phone Field */}
+          <div className="form-group">
+            <div className="input-wrapper">
+              <input
+                type="tel"
+                id="contactPhone"
+                name="contactPhone"
+                value={formData.contactPhone}
+                onChange={handleInputChange}
+                className={`form-input ${errors.contactPhone ? 'error' : ''}`}
+                placeholder="CONTACT PHONE"
+                data-testid="phone-input"
+                autoComplete="tel"
+              />
+            </div>
+            {errors.contactPhone && (
+              <div className="error-message" role="alert">
+                {errors.contactPhone}
               </div>
             )}
           </div>
@@ -320,7 +380,7 @@ const RegisterPage = () => {
           >
             {isLoading ? (
               <>
-                <Loader2 className="loading-spinner" size={20} />
+                <Loader2 className="loading-spinner" />
                 Creating Account...
               </>
             ) : (

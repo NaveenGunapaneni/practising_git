@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNotification } from '../common/NotificationSystem';
-// Error handling utilities available if needed
-// import { errorHandlers, logError } from '../../utils/errorHandler';
 import './LoginPage.css';
 
 const LoginPage = () => {
@@ -63,60 +61,27 @@ const LoginPage = () => {
     if (!validateForm()) return;
     
     setIsLoading(true);
+    setErrors({});
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Login attempt:', formData);
+      // Call the actual API using authService
+      await login({
+        username: formData.email,  // API expects 'username' field
+        password: formData.password
+      });
       
-      // Check if user is registered
-      const registeredUser = localStorage.getItem('registeredUser');
-      if (registeredUser) {
-        const userData = JSON.parse(registeredUser);
-        
-        // Validate credentials
-        if (userData.email === formData.email && userData.password === formData.password) {
-          // Create user info from registered data
-          const emailDomain = formData.email.split('@')[1];
-          const orgName = emailDomain.includes('gmail') || emailDomain.includes('yahoo') || emailDomain.includes('hotmail') || emailDomain.includes('outlook') 
-            ? 'Geo Pulse' 
-            : emailDomain.split('.')[0].replace(/\b\w/g, l => l.toUpperCase()) + ' Corp';
-          
-          const userInfo = {
-            user_name: userData.fullName || formData.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-            email: formData.email,
-            organization_name: orgName
-          };
-          
-          // Store token and user info
-          localStorage.setItem('token', 'mock-jwt-token');
-          localStorage.setItem('userInfo', JSON.stringify(userInfo));
-          
-          // Use replace to prevent back button issues
-          window.location.replace('/dashboard');
-        } else {
-          setErrors({ general: 'Invalid email or password. Please try again.' });
-        }
-      } else {
-        // For demo purposes, allow any login if no registered user
-        const emailDomain = formData.email.split('@')[1];
-        const orgName = emailDomain.includes('gmail') || emailDomain.includes('yahoo') || emailDomain.includes('hotmail') || emailDomain.includes('outlook') 
-          ? 'Geo Pulse' 
-          : emailDomain.split('.')[0].replace(/\b\w/g, l => l.toUpperCase()) + ' Corp';
-        
-        const userInfo = {
-          user_name: formData.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-          email: formData.email,
-          organization_name: orgName
-        };
-        
-        localStorage.setItem('token', 'mock-jwt-token');
-        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+      showNotification('Login successful!', 'success');
+      
+      // Redirect to dashboard after successful login
+      setTimeout(() => {
         window.location.replace('/dashboard');
-      }
+      }, 1000); // Small delay to show success message
+      
     } catch (error) {
       console.error('Login error:', error);
-      setErrors({ general: 'Login failed. Please try again.' });
+      const errorMessage = error.message || 'Login failed. Please check your credentials and try again.';
+      setErrors({ general: errorMessage });
+      showNotification(errorMessage, 'error');
     } finally {
       setIsLoading(false);
     }
@@ -184,6 +149,13 @@ const LoginPage = () => {
               </div>
             )}
           </div>
+
+          {/* General Error Message */}
+          {errors.general && (
+            <div className="error-message general-error" role="alert">
+              {errors.general}
+            </div>
+          )}
 
           {/* Forgot Password Link */}
           <div className="forgot-password-section">

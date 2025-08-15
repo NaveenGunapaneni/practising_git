@@ -31,17 +31,22 @@ const AUTH_ACTIONS = {
 
 // Reducer function
 function authReducer(state, action) {
+  console.log("AuthContext - Reducer called with action:", action.type, action.payload);
+  
+  let newState;
+  
   switch (action.type) {
     case AUTH_ACTIONS.LOGIN_START:
     case AUTH_ACTIONS.REGISTER_START:
-      return {
+      newState = {
         ...state,
         isLoading: true,
         error: null,
       };
+      break;
 
     case AUTH_ACTIONS.LOGIN_SUCCESS:
-      return {
+      newState = {
         ...state,
         user: action.payload.user,
         token: action.payload.access_token,
@@ -49,18 +54,21 @@ function authReducer(state, action) {
         isLoading: false,
         error: null,
       };
+      console.log("AuthContext - LOGIN_SUCCESS new state:", newState);
+      break;
 
     case AUTH_ACTIONS.REGISTER_SUCCESS:
-      return {
+      newState = {
         ...state,
         user: action.payload,
         isLoading: false,
         error: null,
       };
+      break;
 
     case AUTH_ACTIONS.LOGIN_FAILURE:
     case AUTH_ACTIONS.REGISTER_FAILURE:
-      return {
+      newState = {
         ...state,
         user: null,
         token: null,
@@ -68,37 +76,45 @@ function authReducer(state, action) {
         isLoading: false,
         error: action.payload,
       };
+      break;
 
     case AUTH_ACTIONS.LOGOUT:
-      return {
+      newState = {
         ...initialState,
         isLoading: false,
       };
+      break;
 
     case AUTH_ACTIONS.CLEAR_ERROR:
-      return {
+      newState = {
         ...state,
         error: null,
       };
+      break;
 
     case AUTH_ACTIONS.SET_LOADING:
-      return {
+      newState = {
         ...state,
         isLoading: action.payload,
       };
+      break;
 
     case AUTH_ACTIONS.RESTORE_SESSION:
-      return {
+      newState = {
         ...state,
         user: action.payload.user,
         token: action.payload.token,
         isAuthenticated: !!action.payload.token,
         isLoading: false,
       };
+      break;
 
     default:
-      return state;
+      newState = state;
   }
+  
+  console.log("AuthContext - New state:", newState);
+  return newState;
 }
 
 // Create context
@@ -111,23 +127,31 @@ export function AuthProvider({ children }) {
   // Restore session on app load
   useEffect(() => {
     const restoreSession = () => {
+      console.log("AuthContext - Restoring session from localStorage");
       const token = localStorage.getItem('auth_token');
       const userData = localStorage.getItem('user_data');
+      
+      console.log("AuthContext - Found token:", token ? "Yes" : "No");
+      console.log("AuthContext - Found userData:", userData ? "Yes" : "No");
       
       if (token && userData) {
         try {
           const user = JSON.parse(userData);
+          console.log("AuthContext - Parsed user data:", user);
           dispatch({
             type: AUTH_ACTIONS.RESTORE_SESSION,
             payload: { user, token },
           });
+          console.log("AuthContext - Session restored successfully");
         } catch (error) {
+          console.error("AuthContext - Error parsing user data:", error);
           // Invalid stored data, clear it
           localStorage.removeItem('auth_token');
           localStorage.removeItem('user_data');
           dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
         }
       } else {
+        console.log("AuthContext - No stored session found");
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       }
     };
@@ -141,6 +165,8 @@ export function AuthProvider({ children }) {
 
     try {
       const response = await authService.login(credentials);
+      
+      console.log("AuthContext - Login response:", response);
 
       // Store user data in localStorage
       localStorage.setItem('user_data', JSON.stringify(response.user));
@@ -150,8 +176,11 @@ export function AuthProvider({ children }) {
         payload: response,
       });
 
+      console.log("AuthContext - Login success dispatched");
+
       return response;
     } catch (error) {
+      console.error("AuthContext - Login error:", error);
       const errorMessage = error.message || 'Login failed';
       dispatch({
         type: AUTH_ACTIONS.LOGIN_FAILURE,

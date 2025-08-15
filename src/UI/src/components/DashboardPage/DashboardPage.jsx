@@ -31,20 +31,39 @@ const DashboardPage = () => {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
+      console.log('DashboardPage - Starting to fetch dashboard data');
+      console.log('DashboardPage - Current user:', user);
       setLoading(true);
       try {
+        console.log('DashboardPage - Calling dashboardService.getDashboardData()');
         const data = await dashboardService.getDashboardData();
+        console.log('DashboardPage - Dashboard data received:', data);
         setDashboardData(data);
+        console.log('DashboardPage - Dashboard data set successfully');
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        console.error('DashboardPage - Error fetching dashboard data:', error);
         showNotification('Failed to load dashboard data', 'error');
+        // Set default empty data to prevent crashes
+        setDashboardData({
+          metrics: {
+            total_files: 0,
+            processed_files: 0,
+            pending_files: 0,
+            total_lines: 0
+          },
+          files: []
+        });
       } finally {
         setLoading(false);
+        console.log('DashboardPage - Loading finished');
       }
     };
 
     if (user) {
+      console.log('DashboardPage - User exists, fetching dashboard data');
       fetchDashboardData();
+    } else {
+      console.log('DashboardPage - No user found, not fetching dashboard data');
     }
   }, [user, showNotification]);
 
@@ -63,7 +82,7 @@ const DashboardPage = () => {
     // Implement file actions here
   };
 
-  const filteredFiles = dashboardData?.files.filter(file => {
+  const filteredFiles = (dashboardData?.files || []).filter(file => {
     const matchesStatus = statusFilter === 'all' || 
       (statusFilter === 'processed' && file.processed_flag) ||
       (statusFilter === 'pending' && !file.processed_flag);
@@ -72,7 +91,7 @@ const DashboardPage = () => {
       file.engagement_name.toLowerCase().includes(searchTerm.toLowerCase());
     
     return matchesStatus && matchesSearch;
-  }) || [];
+  });
 
   const formatNumber = (num) => {
     return new Intl.NumberFormat().format(num);
@@ -158,7 +177,7 @@ const DashboardPage = () => {
                 <FileText size={24} />
               </div>
               <div className="metric-content">
-                <div className="metric-value">{formatNumber(dashboardData?.metrics.total_files)}</div>
+                <div className="metric-value">{formatNumber(dashboardData?.metrics?.total_files || 0)}</div>
                 <div className="metric-label">Total Files</div>
               </div>
             </div>
@@ -168,7 +187,7 @@ const DashboardPage = () => {
                 <CheckCircle size={24} />
               </div>
               <div className="metric-content">
-                <div className="metric-value">{formatNumber(dashboardData?.metrics.processed_files)}</div>
+                <div className="metric-value">{formatNumber(dashboardData?.metrics?.processed_files || 0)}</div>
                 <div className="metric-label">Processed</div>
               </div>
             </div>
@@ -178,7 +197,7 @@ const DashboardPage = () => {
                 <Clock size={24} />
               </div>
               <div className="metric-content">
-                <div className="metric-value">{formatNumber(dashboardData?.metrics.pending_files)}</div>
+                <div className="metric-value">{formatNumber(dashboardData?.metrics?.pending_files || 0)}</div>
                 <div className="metric-label">Pending</div>
               </div>
             </div>
@@ -188,7 +207,7 @@ const DashboardPage = () => {
                 <BarChart3 size={24} />
               </div>
               <div className="metric-content">
-                <div className="metric-value">{formatNumber(dashboardData?.metrics.total_lines)}</div>
+                <div className="metric-value">{formatNumber(dashboardData?.metrics?.total_lines || 0)}</div>
                 <div className="metric-label">Total Lines</div>
               </div>
             </div>

@@ -220,6 +220,9 @@ class ApiClient {
     const queryString = new URLSearchParams(params).toString();
     const url = queryString ? `${endpoint}?${queryString}` : endpoint;
     
+    console.log('ApiClient - GET request to:', url);
+    console.log('ApiClient - Current token:', this.getToken());
+    
     return this.request(url, {
       method: 'GET',
     });
@@ -275,11 +278,14 @@ export const authService = {
   async login(credentials) {
     const response = await apiClient.post('/auth/login', credentials);
     
-    if (response.access_token) {
-      apiClient.setToken(response.access_token);
+    // Extract data from the API response structure
+    const loginData = response.data || response;
+    
+    if (loginData.access_token) {
+      apiClient.setToken(loginData.access_token);
     }
     
-    return response;
+    return loginData;
   },
 
   async register(userData) {
@@ -313,15 +319,28 @@ export const authService = {
 // Dashboard Service
 export const dashboardService = {
   async getDashboardData() {
-    return apiClient.get('/dashboard');
+    console.log('DashboardService - Making API call to /dashboard');
+    try {
+      const response = await apiClient.get('/dashboard');
+      console.log('DashboardService - Raw API response:', response);
+      // Extract data from the API response structure
+      const data = response.data || response;
+      console.log('DashboardService - Extracted data:', data);
+      return data;
+    } catch (error) {
+      console.error('DashboardService - API call failed:', error);
+      throw error;
+    }
   },
 
   async getMetrics() {
-    return apiClient.get('/dashboard/metrics');
+    const response = await apiClient.get('/dashboard/metrics');
+    return response.data || response;
   },
 
   async getRecentFiles(limit = 10) {
-    return apiClient.get('/dashboard/files', { limit });
+    const response = await apiClient.get('/dashboard/files', { limit });
+    return response.data || response;
   }
 };
 

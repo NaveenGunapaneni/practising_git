@@ -3,9 +3,12 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
+
+  console.log('ProtectedRoute - State:', { user, isAuthenticated, loading });
 
   if (loading) {
+    console.log('ProtectedRoute - Loading state, showing spinner');
     return (
       <div style={{
         display: 'flex',
@@ -35,7 +38,15 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  return user ? children : <Navigate to="/login" replace />;
+  console.log('ProtectedRoute - Checking authentication:', { isAuthenticated, user });
+  
+  if (isAuthenticated && user) {
+    console.log('ProtectedRoute - User authenticated, showing children');
+    return children;
+  } else {
+    console.log('ProtectedRoute - User not authenticated, redirecting to login');
+    return <Navigate to="/login" replace />;
+  }
 };
 
 export default ProtectedRoute;

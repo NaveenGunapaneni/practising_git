@@ -59,7 +59,7 @@ class Settings(BaseSettings):
     cors_allow_credentials: bool = Field(default=True, description="CORS allow credentials")
     
     # Rate limiting settings
-    rate_limit_enabled: bool = Field(default=True, description="Enable rate limiting")
+    rate_limit_enabled: bool = Field(default=False, description="Enable rate limiting")
     rate_limit_per_minute: int = Field(default=60, description="Requests per minute")
     rate_limit_per_hour: int = Field(default=1000, description="Requests per hour")
     
