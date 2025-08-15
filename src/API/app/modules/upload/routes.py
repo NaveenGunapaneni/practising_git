@@ -12,6 +12,7 @@ from app.modules.upload.schemas import (
 from app.modules.upload.services import UploadService
 from app.modules.upload.repository import UploadRepository
 from app.modules.upload.processors.core_processor import CoreFileProcessor
+from app.modules.upload.processors.real_sentinel_hub_processor import RealSentinelHubProcessor
 from app.modules.upload.processors.file_validator import FileValidator
 from app.config import settings
 from app.shared.utils.security import get_current_user
@@ -92,6 +93,7 @@ async def upload_file(
         # Initialize services
         upload_repository = UploadRepository(db)
         file_processor = CoreFileProcessor()
+        sentinel_hub_processor = RealSentinelHubProcessor()
         file_validator = FileValidator(
             max_file_size_mb=settings.MAX_FILE_SIZE_MB,
             allowed_extensions=settings.ALLOWED_FILE_TYPES,
@@ -101,7 +103,8 @@ async def upload_file(
         upload_service = UploadService(
             repository=upload_repository,
             processor=file_processor,
-            validator=file_validator
+            validator=file_validator,
+            sentinel_hub_processor=sentinel_hub_processor
         )
         
         # Process file upload

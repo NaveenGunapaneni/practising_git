@@ -10,7 +10,7 @@ from fastapi import UploadFile
 
 from app.modules.upload.repository import UploadRepository
 from app.modules.upload.processors.core_processor import CoreFileProcessor
-from app.modules.upload.processors.geospatial_processor import GeospatialProcessor
+from app.modules.upload.processors.real_sentinel_hub_processor import RealSentinelHubProcessor
 from app.modules.upload.processors.file_validator import FileValidator
 from app.modules.upload.processors.excel_formatter import format_environmental_analysis_excel
 from app.modules.upload.schemas import FileUploadRequest, FileUploadData
@@ -29,12 +29,12 @@ class UploadService:
         repository: UploadRepository,
         processor: CoreFileProcessor,
         validator: FileValidator,
-        geospatial_processor: GeospatialProcessor = None
+        sentinel_hub_processor: RealSentinelHubProcessor = None
     ):
         self.repository = repository
         self.processor = processor
         self.validator = validator
-        self.geospatial_processor = geospatial_processor or GeospatialProcessor()
+        self.sentinel_hub_processor = sentinel_hub_processor or RealSentinelHubProcessor()
         self.upload_dir = Path(settings.upload_dir)
         self.temp_dir = Path(settings.upload_temp_dir)
         
@@ -194,8 +194,8 @@ class UploadService:
                 is_geospatial = await self._is_geospatial_data(input_path)
                 
                 if is_geospatial:
-                    logger.info(f"Processing as geospatial data: {input_path}")
-                    output_path = await self.geospatial_processor.process_file(
+                    logger.info(f"Processing as geospatial data with real Sentinel Hub API: {input_path}")
+                    output_path = await self.sentinel_hub_processor.process_file(
                         input_path=input_path,
                         output_dir=output_dir,
                         dates=[request.date1, request.date2, request.date3, request.date4],
