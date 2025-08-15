@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from app.modules.registration.models import User
+from app.models.user_api_usage import UserAPIUsage
 from app.core.exceptions import DatabaseException, DuplicateEmailException
 
 
@@ -47,3 +48,15 @@ class RegistrationRepository:
         """Check if email already exists."""
         user = await self.get_user_by_email(email)
         return user is not None
+    
+    async def create_api_usage(self, api_usage: UserAPIUsage) -> UserAPIUsage:
+        """Create API usage record for a user."""
+        try:
+            self.db.add(api_usage)
+            await self.db.commit()
+            await self.db.refresh(api_usage)
+            return api_usage
+            
+        except Exception as e:
+            await self.db.rollback()
+            raise DatabaseException(f"Failed to create API usage record: {str(e)}")

@@ -152,7 +152,8 @@ class UploadService:
         request: FileUploadRequest,
         user_id: int,
         client_ip: Optional[str] = None,
-        user_agent: Optional[str] = None
+        user_agent: Optional[str] = None,
+        db_session = None
     ) -> FileUploadData:
         """Main workflow for file upload and processing."""
         
@@ -199,7 +200,9 @@ class UploadService:
                         input_path=input_path,
                         output_dir=output_dir,
                         dates=[request.date1, request.date2, request.date3, request.date4],
-                        engagement_name=request.engagement_name
+                        engagement_name=request.engagement_name,
+                        user_id=user_id,
+                        db_session=db_session
                     )
                 else:
                     logger.info(f"Processing as generic data: {input_path}")

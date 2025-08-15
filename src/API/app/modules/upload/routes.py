@@ -113,7 +113,8 @@ async def upload_file(
             request=upload_request,
             user_id=user_id,
             client_ip=client_ip,
-            user_agent=user_agent
+            user_agent=user_agent,
+            db_session=db
         )
         
         logger.info(f"File upload completed successfully: {result.file_id}")

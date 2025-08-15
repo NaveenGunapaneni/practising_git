@@ -25,6 +25,7 @@ from sentinelhub import (
 
 from app.core.exceptions import FileProcessingException
 from app.core.logger import get_logger
+from app.services.api_usage_service import APIUsageService
 
 logger = get_logger(__name__)
 
@@ -84,9 +85,11 @@ class RealSentinelHubProcessor:
         input_path: Path,
         output_dir: Path,
         dates: List[str],
-        engagement_name: str
+        engagement_name: str,
+        user_id: int,
+        db_session = None
     ) -> Path:
-        """Process geospatial data with real Sentinel Hub API calls."""
+        """Process geospatial data with real Sentinel Hub API calls with API limit checking."""
         
         logger.info(f"Starting real Sentinel Hub processing: {input_path}")
         
@@ -94,16 +97,34 @@ class RealSentinelHubProcessor:
             # Step 1: Load the input file
             df = await self._load_file(input_path)
             
-            # Step 2: Add temporal period columns
+            # Step 2: Check API limits before processing
+            if db_session:
+                api_service = APIUsageService(db_session)
+                required_calls = len(df) * 2  # 2 API calls per property (before + after periods)
+                
+                can_make_calls, error_message, usage_info = await api_service.check_api_limit(user_id, required_calls)
+                
+                if not can_make_calls:
+                    logger.error(f"API limit exceeded for user {user_id}: {error_message}")
+                    raise FileProcessingException(f"API Limit Exceeded: {error_message}")
+                
+                logger.info(f"API limit check passed for user {user_id}: {required_calls} calls needed, {usage_info['remaining_calls']} remaining")
+            
+            # Step 3: Add temporal period columns
             processed_df = await self._add_temporal_periods(df, dates)
             
-            # Step 3: Get real satellite imagery indices using Sentinel Hub API
-            processed_df = await self._get_real_satellite_indices(processed_df, dates)
+            # Step 4: Get real satellite imagery indices using Sentinel Hub API
+            processed_df, successful_calls = await self._get_real_satellite_indices(processed_df, dates)
             
-            # Step 4: Calculate differences and interpretations
+            # Step 5: Update API usage counter for successful calls
+            if db_session and successful_calls > 0:
+                await api_service.increment_api_usage(user_id, successful_calls)
+                logger.info(f"Updated API usage for user {user_id}: +{successful_calls} successful calls")
+            
+            # Step 6: Calculate differences and interpretations
             processed_df = await self._calculate_differences_and_interpretations(processed_df)
             
-            # Step 5: Generate output file
+            # Step 7: Generate output file
             output_path = await self._generate_output_file(
                 processed_df, 
                 output_dir, 
@@ -157,8 +178,12 @@ class RealSentinelHubProcessor:
         except Exception as e:
             raise FileProcessingException(f"Failed to add temporal periods: {str(e)}")
     
-    async def _get_real_satellite_indices(self, df: pd.DataFrame, dates: List[str]) -> pd.DataFrame:
-        """Get real satellite imagery indices using Sentinel Hub API."""
+    async def _get_real_satellite_indices(self, df: pd.DataFrame, dates: List[str]) -> Tuple[pd.DataFrame, int]:
+        """Get real satellite imagery indices using Sentinel Hub API.
+        
+        Returns:
+            Tuple of (processed_dataframe, successful_api_calls_count)
+        """
         
         try:
             processed_df = df.copy()
@@ -268,7 +293,7 @@ class RealSentinelHubProcessor:
             logger.info(f"   Failed (with error messages): {len(failed_properties)}")
             logger.info(f"   Properties in Output: {len(processed_df)}")
             
-            return processed_df
+            return processed_df, successful_calls
             
         except Exception as e:
             raise FileProcessingException(f"Failed to get real satellite indices: {str(e)}")

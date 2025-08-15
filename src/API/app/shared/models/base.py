@@ -32,8 +32,9 @@ class User(Base):
         nullable=False
     )
     
-    # Relationship
+    # Relationships
     files = relationship("File", back_populates="user")
+    api_usage = relationship("UserAPIUsage", back_populates="user", uselist=False)
     
     def __repr__(self) -> str:
         return f"<User(user_id={self.user_id}, email='{self.email}')>"

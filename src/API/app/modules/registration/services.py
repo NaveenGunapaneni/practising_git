@@ -11,6 +11,7 @@ from typing import Dict, Any
 from app.modules.registration.repository import RegistrationRepository
 from app.modules.registration.schemas import UserRegistrationRequest, UserData
 from app.modules.registration.models import User
+from app.models.user_api_usage import UserAPIUsage
 from app.config import settings
 from app.core.exceptions import ValidationException, DuplicateEmailException
 from app.core.logger import get_logger
@@ -62,6 +63,9 @@ class RegistrationService:
             # Create user in database
             user = await self.repository.create_user(db_user_data)
             
+            # Create API usage record for the new user
+            await self._create_api_usage_record(user.user_id)
+            
             # Create user JSON file
             await self._create_user_json_file(user)
             
@@ -74,6 +78,19 @@ class RegistrationService:
         except Exception as e:
             logger.error(f"Unexpected error during user registration: {str(e)}")
             raise ValidationException(f"Registration failed: {str(e)}")
+    
+    async def _create_api_usage_record(self, user_id: int) -> None:
+        """Create API usage record for new user."""
+        try:
+            api_usage = UserAPIUsage.create_for_user(user_id, allowed_calls=50)
+            await self.repository.create_api_usage(api_usage)
+            
+            logger.info(f"API usage record created for user {user_id} with 50 allowed calls, expires: {api_usage.user_expiry_date}")
+            
+        except Exception as e:
+            logger.error(f"Failed to create API usage record for user {user_id}: {str(e)}")
+            # Don't fail registration for API usage creation, but log the error
+            # The user can be manually added later if needed
     
     async def _create_user_json_file(self, user: User) -> None:
         """Create JSON file for user data."""
