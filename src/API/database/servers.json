@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "GeoPulse PostgreSQL",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "geopulse_db",
+      "Username": "geopulse_user",
+      "PassFile": "/tmp/pgpassfile",
+      "SSLMode": "prefer"
+    }
+  }
+}

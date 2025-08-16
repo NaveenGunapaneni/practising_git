@@ -24,52 +24,21 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor for error handling
+// Response interceptor for error handling (DISABLED FOR DEMO MODE)
 api.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
-    if (error.response) {
-      // Server responded with error status
-      const { status, data } = error.response;
-      
-      switch (status) {
-        case 401:
-          // Unauthorized - clear token and redirect to login
-          localStorage.removeItem('token');
-          window.location.href = '/login';
-          toast.error('Session expired. Please login again.');
-          break;
-        case 403:
-          toast.error('Access denied. You do not have permission to perform this action.');
-          break;
-        case 404:
-          toast.error('Resource not found.');
-          break;
-        case 422:
-          // Validation errors
-          if (data.detail && Array.isArray(data.detail)) {
-            const errors = data.detail.map(err => err.msg).join(', ');
-            toast.error(errors);
-          } else {
-            toast.error(data.message || 'Validation error occurred.');
-          }
-          break;
-        case 500:
-          toast.error('Server error. Please try again later.');
-          break;
-        default:
-          toast.error(data.message || 'An error occurred.');
-      }
-    } else if (error.request) {
-      // Network error
-      toast.error('Network error. Please check your connection.');
-    } else {
-      // Other error
-      toast.error('An unexpected error occurred.');
+    // Only handle critical auth errors, not network errors
+    if (error.response?.status === 401) {
+      // Only clear auth for actual 401 responses, not network failures
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
     }
     
+    // Don't show automatic toast notifications - let components handle their own errors
     return Promise.reject(error);
   }
 );

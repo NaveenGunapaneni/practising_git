@@ -336,12 +336,13 @@ async def get_file_status(
 async def download_file(
     file_id: int,
     request: Request,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session)
 ):
     """Download processed file."""
     try:
-        # Get current user ID from JWT token
-        user_id = get_current_user_id(request)
+        # Get current user ID from authenticated user
+        user_id = current_user.user_id
         
         logger.info(f"File download request from user {user_id} for file {file_id}")
         

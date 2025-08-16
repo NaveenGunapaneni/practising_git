@@ -12,6 +12,37 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
+// Logo component that tries to load the logo image, falls back to icon if not found
+const Logo = ({ className = "h-20 w-24" }) => {
+  const [logoError, setLogoError] = useState(false);
+  
+  // Try different logo file names
+  const logoFiles = [
+    '/images/AP_logo.png',
+    '/images/AP_logo.svg',
+    '/images/AP_logo.jpg',
+    '/images/logo.png',
+    '/images/logo.svg',
+    '/images/geopulse-logo.png',
+    '/images/geopulse-logo.svg',
+    '/images/logo.jpg'
+  ];
+
+  if (!logoError) {
+    return (
+      <img
+        src={logoFiles[0]} // Start with the first logo file
+        alt="GeoPulse Logo"
+        className={className}
+        onError={() => setLogoError(true)}
+      />
+    );
+  }
+
+  // Fallback to icon if logo image fails to load
+  return <Building2 className={`${className} text-primary-600`} />;
+};
+
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
@@ -36,11 +67,11 @@ const Layout = ({ children }) => {
       <div className={`fixed inset-0 z-50 lg:hidden ${mobileMenuOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setMobileMenuOpen(false)} />
         <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white">
-          <div className="flex h-16 items-center justify-between px-4">
-            <div className="flex items-center">
-              <Building2 className="h-8 w-8 text-primary-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">GeoPulse</span>
-            </div>
+                     <div className="flex h-24 items-center justify-between px-4">
+             <div className="flex flex-col items-center">
+               <Logo className="h-20 w-24" />
+               <span className="mt-1 text-xl font-extrabold text-gray-900">GeoPulse</span>
+             </div>
             <button
               onClick={() => setMobileMenuOpen(false)}
               className="text-gray-400 hover:text-gray-600"
@@ -89,10 +120,10 @@ const Layout = ({ children }) => {
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col flex-grow bg-white border-r border-gray-200">
-          <div className="flex items-center h-16 px-4">
-            <Building2 className="h-8 w-8 text-primary-600" />
-            <span className="ml-2 text-xl font-bold text-gray-900">GeoPulse</span>
-          </div>
+                     <div className="flex flex-col items-center h-24 px-4 pt-2">
+             <Logo className="h-20 w-24" />
+             <span className="mt-1 text-xl font-extrabold text-gray-900">GeoPulse</span>
+           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
             {navigation.map((item) => (
               <Link
@@ -142,10 +173,10 @@ const Layout = ({ children }) => {
             <Menu className="h-6 w-6" />
           </button>
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-            <div className="flex items-center">
-              <Building2 className="h-6 w-6 text-primary-600" />
-              <span className="ml-2 text-lg font-semibold text-gray-900">GeoPulse</span>
-            </div>
+                         <div className="flex flex-col items-center">
+               <Logo className="h-16 w-20" />
+               <span className="mt-1 text-lg font-extrabold text-gray-900">GeoPulse</span>
+             </div>
           </div>
         </div>
 

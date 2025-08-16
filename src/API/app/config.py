@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     
     # Database settings
     database_url: str = Field(
-        default="postgresql+asyncpg://geopulse_user:password123@localhost:5432/geopulse_db",
+        default="postgresql+asyncpg://geopulse_user:geopulse_secure_123@localhost:5432/geopulse_db",
         description="Database connection URL"
     )
     database_pool_size: int = Field(default=20, description="Database connection pool size")

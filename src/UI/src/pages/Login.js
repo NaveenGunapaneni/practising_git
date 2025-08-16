@@ -3,6 +3,24 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Building2, Eye, EyeOff, Loader2 } from 'lucide-react';
 
+// Logo component for login/register pages
+const Logo = ({ className = "h-32 w-40" }) => {
+  const [logoError, setLogoError] = useState(false);
+  
+  if (!logoError) {
+    return (
+      <img
+        src="/images/AP_logo.png"
+        alt="GeoPulse Logo"
+        className={className}
+        onError={() => setLogoError(true)}
+      />
+    );
+  }
+
+  return <Building2 className={`${className} text-primary-600`} />;
+};
+
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
@@ -10,7 +28,7 @@ const Login = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, demoLogin } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -36,13 +54,28 @@ const Login = () => {
     }
   };
 
+  const handleDemoLogin = async () => {
+    setLoading(true);
+    
+    try {
+      const result = await demoLogin();
+      if (result.success) {
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      console.error('Demo login error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        <div>
-          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-primary-100">
-            <Building2 className="h-8 w-8 text-primary-600" />
-          </div>
+                 <div>
+           <div className="mx-auto flex items-center justify-center">
+             <Logo className="h-32 w-40" />
+           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Sign in to your account
           </h2>
@@ -103,7 +136,7 @@ const Login = () => {
             </div>
           </div>
 
-          <div>
+          <div className="space-y-3">
             <button
               type="submit"
               disabled={loading}
@@ -114,6 +147,19 @@ const Login = () => {
               ) : (
                 'Sign in'
               )}
+            </button>
+            
+            <div className="text-center">
+              <span className="text-sm text-gray-500">or</span>
+            </div>
+            
+            <button
+              type="button"
+              onClick={handleDemoLogin}
+              disabled={loading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Demo Login (Development Mode)
             </button>
           </div>
         </form>

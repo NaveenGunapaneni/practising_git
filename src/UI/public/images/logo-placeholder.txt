@@ -1,0 +1,21 @@
+LOGO PLACEMENT INSTRUCTIONS:
+
+1. Add your logo image file here (e.g., logo.png, logo.svg, logo.jpg)
+2. Recommended formats: PNG, SVG, or JPG
+3. Recommended size: 32x32px to 64x64px for sidebar, 120x40px for header
+4. File naming: Use "logo.png" or "geopulse-logo.png"
+
+SUPPORTED LOGO FILES:
+- logo.png
+- logo.svg  
+- logo.jpg
+- geopulse-logo.png
+- geopulse-logo.svg
+
+The logo will automatically appear in:
+- Sidebar navigation
+- Browser tab favicon
+- Login/Register pages
+- Dashboard header (if needed)
+
+After adding your logo file, the application will automatically detect and display it.

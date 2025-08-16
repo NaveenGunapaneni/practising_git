@@ -1,11 +1,13 @@
 services:
   postgres:
-    image: postgres:15-alpine
+    image: postgres:15
     container_name: geopulse_postgres
     environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: geopulse_db
+      POSTGRES_USER: geopulse_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-geopulse_secure_123}
+      POSTGRES_SHARED_PRELOAD_LIBRARIES: pg_stat_statements
+      POSTGRES_MAX_CONNECTIONS: 200
     ports:
       - "5432:5432"
     volumes:
@@ -22,16 +24,17 @@ services:
       retries: 5
 
   pgadmin:
-    image: dpage/pgadmin4:latest
+    image: dpage/pgadmin4:7.8
     container_name: geopulse_pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@geopulse.com
-      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@geopulse.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin123}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
       - "8080:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+      - ./servers.json:/pgadmin4/servers.json
     networks:
       - geopulse_network
     restart: unless-stopped

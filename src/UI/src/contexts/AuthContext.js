@@ -14,8 +14,31 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Restore authentication state from localStorage on app start
+  useEffect(() => {
+    const savedToken = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+    
+    if (savedToken && savedUser) {
+      try {
+        const userData = JSON.parse(savedUser);
+        setToken(savedToken);
+        setUser(userData);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
+      } catch (error) {
+        console.error('Error parsing saved user data:', error);
+        // Clear invalid data
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        delete axios.defaults.headers.common['Authorization'];
+      }
+    }
+    
+    setLoading(false);
+  }, []);
 
   // Configure axios defaults
   useEffect(() => {
@@ -24,29 +47,6 @@ export const AuthProvider = ({ children }) => {
     } else {
       delete axios.defaults.headers.common['Authorization'];
     }
-  }, [token]);
-
-  // Check if token is valid on app load
-  useEffect(() => {
-    const checkAuth = async () => {
-      if (token) {
-        try {
-          // Get user info from dashboard but don't set loading state
-          const response = await axios.get('/api/v1/dashboard');
-          if (response.data.status === 'success') {
-            setUser(response.data.data.user);
-          } else {
-            logout();
-          }
-        } catch (error) {
-          console.error('Auth check failed:', error);
-          logout();
-        }
-      }
-      setLoading(false);
-    };
-
-    checkAuth();
   }, [token]);
 
   const login = async (email, password) => {
@@ -66,6 +66,7 @@ export const AuthProvider = ({ children }) => {
         setToken(access_token);
         setUser(userData);
         localStorage.setItem('token', access_token);
+        localStorage.setItem('user', JSON.stringify(userData));
         toast.success('Login successful!');
         return { success: true };
       }
@@ -93,10 +94,28 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const demoLogin = () => {
+    const mockUser = {
+      user_id: 'demo',
+      user_name: 'Demo User',
+      email: 'demo@geopulse.com'
+    };
+    
+    const mockToken = 'demo-token-' + Date.now();
+    
+    setToken(mockToken);
+    setUser(mockUser);
+    localStorage.setItem('token', mockToken);
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    toast.success('Demo login successful!');
+    return { success: true };
+  };
+
   const logout = () => {
     setUser(null);
     setToken(null);
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     delete axios.defaults.headers.common['Authorization'];
     toast.success('Logged out successfully');
   };
@@ -109,6 +128,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    demoLogin,
   };
 
   return (
