@@ -34,7 +34,9 @@ class FileValidator:
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',  # .xlsx
             'application/vnd.ms-excel',  # .xls
             'text/csv',  # .csv
-            'application/csv'  # .csv alternative
+            'application/csv',  # .csv alternative
+            'application/octet-stream',  # Generic binary (for CSV files)
+            'text/plain'  # Plain text (for CSV files)
         ])
     
     async def validate_file(self, file: UploadFile) -> None:

@@ -362,6 +362,12 @@ class RealSentinelHubProcessor:
                 data = response[0]
                 data_shape = data.shape
                 
+                # Check if data contains valid values (not all zeros)
+                if np.all(data == 0):
+                    error_msg = f"No valid satellite data available for period {time_period} at location ({lat:.6f}, {lon:.6f})"
+                    self._log_api_response(request_id, False, response_time, data_shape, error_msg)
+                    return {'ndvi': 0.0, 'ndbi': 0.0, 'ndwi': 0.0}, error_msg
+                
                 # Calculate mean values for each index
                 indices = {
                     'ndvi': float(np.mean(data[:, :, 0])),

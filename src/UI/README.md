@@ -1,201 +1,178 @@
-# GeoPulse - Professional Data Processing Platform
+# GeoPulse UI
 
-A modern, responsive web application for data processing and analysis with a comprehensive React frontend and Python FastAPI backend.
+A modern React-based user interface for the GeoPulse geospatial data processing platform.
 
-## 🚀 Features
+## Features
 
-### Frontend (React)
-- **Modern UI/UX**: Clean, professional interface with responsive design
-- **Authentication System**: Complete login/register with JWT token management
-- **Dashboard**: Real-time metrics and file management
-- **File Upload**: Drag & drop CSV file upload with progress tracking
-- **Notifications**: Toast notification system for user feedback
-- **Protected Routes**: Secure navigation with authentication guards
-- **Fallback Support**: Works with or without backend connectivity
+- **User Authentication**: Secure login and registration system
+- **Dashboard**: Comprehensive overview with metrics and file management
+- **File Upload**: Drag-and-drop file upload with progress tracking
+- **File Management**: View, search, filter, and download processed files
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **Real-time Updates**: Live status updates and notifications
 
-### Backend (Python FastAPI)
-- **RESTful API**: Comprehensive API endpoints
-- **PostgreSQL Database**: Robust data storage
-- **Authentication**: JWT-based user authentication
-- **File Processing**: CSV file upload and processing
-- **Health Monitoring**: API health check endpoints
+## Tech Stack
 
-## 📁 Project Structure
+- **React 18**: Modern React with hooks and functional components
+- **React Router**: Client-side routing
+- **Tailwind CSS**: Utility-first CSS framework
+- **Axios**: HTTP client for API communication
+- **React Dropzone**: File upload with drag-and-drop
+- **React Hot Toast**: Toast notifications
+- **Lucide React**: Beautiful icons
+- **Date-fns**: Date manipulation utilities
 
-```
-GeoPulse/
-├── src/                          # React Frontend
-│   ├── components/
-│   │   ├── LoginPage/           # User authentication
-│   │   ├── RegisterPage/        # User registration
-│   │   ├── DashboardPage/       # Main dashboard
-│   │   ├── UploadPage/          # File upload interface
-│   │   └── common/              # Shared components
-│   ├── contexts/                # React contexts
-│   ├── services/                # API service layer
-│   ├── utils/                   # Utility functions
-│   └── config/                  # Configuration files
-├── geopulse_api/                # Python FastAPI Backend
-│   ├── setup_postgres.sql      # Database setup script
-│   └── [API implementation]
-└── public/                      # Static assets
-```
-
-## 🛠️ Installation & Setup
+## Getting Started
 
 ### Prerequisites
+
 - Node.js (v16 or higher)
-- PostgreSQL (v12 or higher)
-- Python (v3.8 or higher)
+- npm or yarn
+- GeoPulse API server running on `http://localhost:8000`
 
-### Frontend Setup
+### Installation
+
+1. Navigate to the UI directory:
+   ```bash
+   cd UI
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm start
+   ```
+
+4. Open your browser and navigate to `http://localhost:3000`
+
+### Building for Production
+
 ```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm start
-
-# Build for production
 npm run build
 ```
 
-### Backend Setup
-```bash
-# Navigate to API directory
-cd geopulse_api
+This creates an optimized production build in the `build` folder.
 
-# Install Python dependencies
-pip install -r requirements.txt
+## Project Structure
 
-# Set up PostgreSQL database
-psql -U postgres -f setup_postgres.sql
-
-# Start FastAPI server
-uvicorn main:app --reload --port 8000
+```
+src/
+├── components/          # Reusable UI components
+│   └── Layout.js       # Main layout with navigation
+├── contexts/           # React contexts
+│   └── AuthContext.js  # Authentication state management
+├── pages/              # Page components
+│   ├── Login.js        # User login page
+│   ├── Register.js     # User registration page
+│   ├── Dashboard.js    # Main dashboard with metrics
+│   └── FileUpload.js   # File upload interface
+├── App.js              # Main app component with routing
+├── index.js            # React entry point
+└── index.css           # Global styles and Tailwind imports
 ```
 
-### Database Configuration
-The application uses PostgreSQL with the following default settings:
-- **Database**: `geopulse_db`
-- **User**: `geopulse_user`
-- **Password**: `password123`
-- **Port**: `5432`
+## API Integration
 
-## 🔧 Configuration
+The UI integrates with the GeoPulse API endpoints:
+
+- **Authentication**: `/api/v1/auth/login`, `/api/v1/auth/register`
+- **Dashboard**: `/api/v1/dashboard`
+- **File Upload**: `/api/v1/files/upload`
+- **File Download**: `/api/v1/files/{id}/download`
+
+## User Flow
+
+1. **Registration**: Users create an account with organization details
+2. **Login**: Secure authentication with JWT tokens
+3. **Dashboard**: View metrics and previously processed files
+4. **File Upload**: Upload XLSX/CSV files with engagement details
+5. **Processing**: Files are automatically processed on the server
+6. **Download**: Download processed files from the dashboard
+
+## Features in Detail
+
+### Authentication
+- Secure JWT-based authentication
+- Automatic token refresh
+- Protected routes
+- Session persistence
+
+### Dashboard
+- Real-time metrics display
+- File status tracking
+- Search and filtering capabilities
+- Sortable file lists
+- Download functionality for processed files
+
+### File Upload
+- Drag-and-drop interface
+- File type validation (XLSX, CSV)
+- File size validation (50MB limit)
+- Progress tracking
+- Form validation for required fields
+
+### Responsive Design
+- Mobile-first approach
+- Responsive navigation
+- Adaptive layouts
+- Touch-friendly interfaces
+
+## Configuration
+
+### API Base URL
+The application is configured to proxy requests to `http://localhost:8000` in development. For production, update the proxy setting in `package.json` or configure your web server accordingly.
 
 ### Environment Variables
-Create a `.env` file in the root directory:
+Create a `.env` file in the root directory for environment-specific configuration:
 
 ```env
-# API Configuration
 REACT_APP_API_URL=http://localhost:8000
 REACT_APP_ENVIRONMENT=development
-
-# Database (for backend)
-DATABASE_URL=postgresql://geopulse_user:password123@localhost:5432/geopulse_db
 ```
 
-### API Endpoints
-- **Authentication**: `/api/v1/auth/`
-- **Dashboard**: `/api/v1/dashboard/`
-- **File Management**: `/api/v1/files/`
-- **Health Check**: `/api/v1/health/`
+## Development
 
-## 🎯 Key Features
+### Available Scripts
 
-### 1. Authentication System
-- Secure JWT-based authentication
-- User registration and login
-- Protected routes and session management
-- Automatic token refresh
+- `npm start`: Start development server
+- `npm build`: Build for production
+- `npm test`: Run tests
+- `npm eject`: Eject from Create React App
 
-### 2. Dashboard
-- Real-time metrics display
-- File management interface
-- Search and filter functionality
-- Responsive design for all devices
+### Code Style
 
-### 3. File Upload
-- Drag & drop interface
-- Progress tracking
-- File validation (CSV only, max 10MB)
-- Engagement name association
+The project uses:
+- ESLint for code linting
+- Prettier for code formatting
+- Tailwind CSS for styling
 
-### 4. Notification System
-- Toast notifications for all user actions
-- Success, error, warning, and info types
-- Auto-dismiss with configurable duration
-- Queue management for multiple notifications
+### Adding New Features
 
-### 5. Fallback Support
-- Works without backend connectivity
-- Mock data for development/demo
-- Graceful error handling
-- Network timeout management
+1. Create new components in the `components/` directory
+2. Add new pages in the `pages/` directory
+3. Update routing in `App.js`
+4. Add any new API integrations in the appropriate context or service files
 
-## 🔒 Security Features
+## Troubleshooting
 
-- JWT token-based authentication
-- Protected API endpoints
-- Input validation and sanitization
-- Secure token storage
-- CORS configuration
-- SQL injection prevention
+### Common Issues
 
-## 📱 Responsive Design
+1. **API Connection Errors**: Ensure the GeoPulse API server is running on port 8000
+2. **CORS Issues**: The development proxy should handle CORS automatically
+3. **Build Errors**: Clear node_modules and reinstall dependencies
 
-The application is fully responsive and works on:
-- Desktop computers
-- Tablets
-- Mobile phones
-- Various screen sizes and orientations
+### Debug Mode
 
-## 🧪 Testing
-
-```bash
-# Run frontend tests
-npm test
-
-# Run tests with coverage
-npm test -- --coverage
-
-# Run linting
-npm run lint
-
-# Format code
-npm run format
+Enable debug logging by setting the browser's localStorage:
+```javascript
+localStorage.setItem('debug', 'true');
 ```
 
-## 🚀 Deployment
-
-### Frontend Deployment
-```bash
-# Build production bundle
-npm run build
-
-# Deploy to your preferred hosting service
-# (Netlify, Vercel, AWS S3, etc.)
-```
-
-### Backend Deployment
-```bash
-# Install production dependencies
-pip install -r requirements.txt
-
-# Run with production WSGI server
-gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker
-```
-
-## 📊 Performance
-
-- **Lazy Loading**: Components loaded on demand
-- **Code Splitting**: Optimized bundle sizes
-- **Caching**: API response caching
-- **Compression**: Gzip compression enabled
-- **CDN Ready**: Static assets optimized for CDN
-
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -203,24 +180,10 @@ gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker
 4. Add tests if applicable
 5. Submit a pull request
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is part of the GeoPulse platform and follows the same licensing terms.
 
-## 🆘 Support
+## Support
 
-For support and questions:
-- Create an issue in the repository
-- Contact the development team
-- Check the documentation
-
-## 🔄 Version History
-
-- **v1.0.0**: Initial release with full authentication and dashboard
-- **v1.1.0**: Added file upload functionality
-- **v1.2.0**: Enhanced notification system
-- **v1.3.0**: Added fallback support and improved error handling
-
----
-
-**Built with ❤️ by the GeoPulse Development Team**
+For support and questions, please refer to the main GeoPulse documentation or contact the development team.

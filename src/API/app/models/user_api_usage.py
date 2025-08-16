@@ -52,7 +52,9 @@ class UserAPIUsage(Base):
             Tuple of (can_make_calls, error_message)
         """
         # Check if user account has expired
-        if datetime.utcnow() > self.user_expiry_date:
+        # Use timezone-aware datetime for comparison
+        current_time = datetime.utcnow().replace(tzinfo=self.user_expiry_date.tzinfo)
+        if current_time > self.user_expiry_date:
             return False, f"User account expired on {self.user_expiry_date.strftime('%Y-%m-%d')}. Please renew your subscription."
         
         # Check if user has enough API calls remaining
@@ -70,7 +72,9 @@ class UserAPIUsage(Base):
     def get_usage_summary(self) -> dict:
         """Get usage summary for the user."""
         remaining_calls = max(0, self.allowed_api_calls - self.performed_api_calls)
-        days_until_expiry = (self.user_expiry_date - datetime.utcnow()).days
+        # Use timezone-aware datetime for comparison
+        current_time = datetime.utcnow().replace(tzinfo=self.user_expiry_date.tzinfo)
+        days_until_expiry = (self.user_expiry_date - current_time).days
         
         return {
             "user_id": self.user_id,
@@ -81,14 +85,16 @@ class UserAPIUsage(Base):
             "account_created": self.user_created_date.strftime('%Y-%m-%d'),
             "account_expires": self.user_expiry_date.strftime('%Y-%m-%d'),
             "days_until_expiry": max(0, days_until_expiry),
-            "is_expired": datetime.utcnow() > self.user_expiry_date
+            "is_expired": current_time > self.user_expiry_date
         }
     
     def extend_expiry(self, days: int = 30):
         """Extend user expiry date."""
-        if datetime.utcnow() > self.user_expiry_date:
+        # Use timezone-aware datetime for comparison
+        current_time = datetime.utcnow().replace(tzinfo=self.user_expiry_date.tzinfo)
+        if current_time > self.user_expiry_date:
             # If already expired, extend from today
-            self.user_expiry_date = datetime.utcnow() + timedelta(days=days)
+            self.user_expiry_date = current_time + timedelta(days=days)
         else:
             # If not expired, extend from current expiry date
             self.user_expiry_date += timedelta(days=days)

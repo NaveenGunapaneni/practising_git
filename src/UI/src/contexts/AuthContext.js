@@ -1,251 +1,114 @@
-/**
- * Authentication Context
- * Manages user authentication state across the application
- */
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { authService } from '../services/api';
-
-// Initial state
-const initialState = {
-  user: null,
-  token: null,
-  isAuthenticated: false,
-  isLoading: true,
-  error: null,
-};
-
-// Action types
-const AUTH_ACTIONS = {
-  LOGIN_START: 'LOGIN_START',
-  LOGIN_SUCCESS: 'LOGIN_SUCCESS',
-  LOGIN_FAILURE: 'LOGIN_FAILURE',
-  LOGOUT: 'LOGOUT',
-  REGISTER_START: 'REGISTER_START',
-  REGISTER_SUCCESS: 'REGISTER_SUCCESS',
-  REGISTER_FAILURE: 'REGISTER_FAILURE',
-  CLEAR_ERROR: 'CLEAR_ERROR',
-  SET_LOADING: 'SET_LOADING',
-  RESTORE_SESSION: 'RESTORE_SESSION',
-};
-
-// Reducer function
-function authReducer(state, action) {
-  console.log("AuthContext - Reducer called with action:", action.type, action.payload);
-  
-  let newState;
-  
-  switch (action.type) {
-    case AUTH_ACTIONS.LOGIN_START:
-    case AUTH_ACTIONS.REGISTER_START:
-      newState = {
-        ...state,
-        isLoading: true,
-        error: null,
-      };
-      break;
-
-    case AUTH_ACTIONS.LOGIN_SUCCESS:
-      newState = {
-        ...state,
-        user: action.payload.user,
-        token: action.payload.access_token,
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-      };
-      console.log("AuthContext - LOGIN_SUCCESS new state:", newState);
-      break;
-
-    case AUTH_ACTIONS.REGISTER_SUCCESS:
-      newState = {
-        ...state,
-        user: action.payload,
-        isLoading: false,
-        error: null,
-      };
-      break;
-
-    case AUTH_ACTIONS.LOGIN_FAILURE:
-    case AUTH_ACTIONS.REGISTER_FAILURE:
-      newState = {
-        ...state,
-        user: null,
-        token: null,
-        isAuthenticated: false,
-        isLoading: false,
-        error: action.payload,
-      };
-      break;
-
-    case AUTH_ACTIONS.LOGOUT:
-      newState = {
-        ...initialState,
-        isLoading: false,
-      };
-      break;
-
-    case AUTH_ACTIONS.CLEAR_ERROR:
-      newState = {
-        ...state,
-        error: null,
-      };
-      break;
-
-    case AUTH_ACTIONS.SET_LOADING:
-      newState = {
-        ...state,
-        isLoading: action.payload,
-      };
-      break;
-
-    case AUTH_ACTIONS.RESTORE_SESSION:
-      newState = {
-        ...state,
-        user: action.payload.user,
-        token: action.payload.token,
-        isAuthenticated: !!action.payload.token,
-        isLoading: false,
-      };
-      break;
-
-    default:
-      newState = state;
-  }
-  
-  console.log("AuthContext - New state:", newState);
-  return newState;
-}
-
-// Create context
 const AuthContext = createContext();
 
-// Auth provider component
-export function AuthProvider({ children }) {
-  const [state, dispatch] = useReducer(authReducer, initialState);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
 
-  // Restore session on app load
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [loading, setLoading] = useState(true);
+
+  // Configure axios defaults
   useEffect(() => {
-    const restoreSession = () => {
-      console.log("AuthContext - Restoring session from localStorage");
-      const token = localStorage.getItem('auth_token');
-      const userData = localStorage.getItem('user_data');
-      
-      console.log("AuthContext - Found token:", token ? "Yes" : "No");
-      console.log("AuthContext - Found userData:", userData ? "Yes" : "No");
-      
-      if (token && userData) {
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+      delete axios.defaults.headers.common['Authorization'];
+    }
+  }, [token]);
+
+  // Check if token is valid on app load
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (token) {
         try {
-          const user = JSON.parse(userData);
-          console.log("AuthContext - Parsed user data:", user);
-          dispatch({
-            type: AUTH_ACTIONS.RESTORE_SESSION,
-            payload: { user, token },
-          });
-          console.log("AuthContext - Session restored successfully");
+          // Get user info from dashboard but don't set loading state
+          const response = await axios.get('/api/v1/dashboard');
+          if (response.data.status === 'success') {
+            setUser(response.data.data.user);
+          } else {
+            logout();
+          }
         } catch (error) {
-          console.error("AuthContext - Error parsing user data:", error);
-          // Invalid stored data, clear it
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('user_data');
-          dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+          console.error('Auth check failed:', error);
+          logout();
         }
-      } else {
-        console.log("AuthContext - No stored session found");
-        dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       }
+      setLoading(false);
     };
 
-    restoreSession();
-  }, []);
+    checkAuth();
+  }, [token]);
 
-  // Login function
-  const login = async (credentials) => {
-    dispatch({ type: AUTH_ACTIONS.LOGIN_START });
-
+  const login = async (email, password) => {
     try {
-      const response = await authService.login(credentials);
-      
-      console.log("AuthContext - Login response:", response);
+      const formData = new FormData();
+      formData.append('username', email);
+      formData.append('password', password);
 
-      // Store user data in localStorage
-      localStorage.setItem('user_data', JSON.stringify(response.user));
-      
-      dispatch({
-        type: AUTH_ACTIONS.LOGIN_SUCCESS,
-        payload: response,
+      const response = await axios.post('/api/v1/auth/login', formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
       });
 
-      console.log("AuthContext - Login success dispatched");
-
-      return response;
+      if (response.data.status === 'success') {
+        const { access_token, user: userData } = response.data.data;
+        setToken(access_token);
+        setUser(userData);
+        localStorage.setItem('token', access_token);
+        toast.success('Login successful!');
+        return { success: true };
+      }
     } catch (error) {
-      console.error("AuthContext - Login error:", error);
-      const errorMessage = error.message || 'Login failed';
-      dispatch({
-        type: AUTH_ACTIONS.LOGIN_FAILURE,
-        payload: errorMessage,
-      });
-
-      throw error;
+      console.error('Login error:', error);
+      const message = error.response?.data?.message || 'Login failed. Please try again.';
+      toast.error(message);
+      return { success: false, error: message };
     }
   };
 
-  // Register function
   const register = async (userData) => {
-    dispatch({ type: AUTH_ACTIONS.REGISTER_START });
-
     try {
-      const response = await authService.register(userData);
-
-      dispatch({
-        type: AUTH_ACTIONS.REGISTER_SUCCESS,
-        payload: response.user || response,
-      });
-
-      return response;
+      const response = await axios.post('/api/v1/auth/register', userData);
+      
+      if (response.data.status === 'success') {
+        toast.success('Registration successful! Please login.');
+        return { success: true };
+      }
     } catch (error) {
-      const errorMessage = error.message || 'Registration failed';
-      dispatch({
-        type: AUTH_ACTIONS.REGISTER_FAILURE,
-        payload: errorMessage,
-      });
-
-      throw error;
+      console.error('Registration error:', error);
+      const message = error.response?.data?.message || 'Registration failed. Please try again.';
+      toast.error(message);
+      return { success: false, error: message };
     }
   };
 
-  // Logout function
-  const logout = async () => {
-    try {
-      await authService.logout();
-    } catch (error) {
-      console.warn('Logout API call failed:', error);
-    } finally {
-      localStorage.removeItem('user_data');
-      dispatch({ type: AUTH_ACTIONS.LOGOUT });
-    }
+  const logout = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('token');
+    delete axios.defaults.headers.common['Authorization'];
+    toast.success('Logged out successfully');
   };
 
-  // Clear error function
-  const clearError = () => {
-    dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
-  };
-
-  // Context value
   const value = {
-    // State
-    user: state.user,
-    token: state.token,
-    isAuthenticated: state.isAuthenticated,
-    isLoading: state.isLoading,
-    error: state.error,
-
-    // Actions
+    user,
+    token,
+    isAuthenticated: !!token && !!user,
+    loading,
     login,
     register,
     logout,
-    clearError,
   };
 
   return (
@@ -253,40 +116,4 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-// Custom hook to use auth context
-export function useAuth() {
-  const context = useContext(AuthContext);
-  
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  
-  return context;
-}
-
-// HOC for protected routes
-export function withAuth(Component) {
-  return function AuthenticatedComponent(props) {
-    const { isAuthenticated, isLoading } = useAuth();
-
-    if (isLoading) {
-      return (
-        <div className="loading-state">
-          <div className="loading-spinner"></div>
-          <p>Loading...</p>
-        </div>
-      );
-    }
-
-    if (!isAuthenticated) {
-      // Redirect to login or show login form
-      return null;
-    }
-
-    return <Component {...props} />;
-  };
-}
-
-export default AuthContext;
+};
