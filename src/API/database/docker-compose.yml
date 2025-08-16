@@ -11,6 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./setup_postgres.sql:/docker-entrypoint-initdb.d/setup_postgres.sql
+      - ./create_api_usage_table.sql:/docker-entrypoint-initdb.d/create_api_usage_table.sql
     networks:
       - geopulse_network
     restart: unless-stopped

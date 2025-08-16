@@ -2,12 +2,65 @@
 
 This document contains SQL queries to explore and manage the **geopulse_db** database. Run these queries in pgAdmin or any PostgreSQL client.
 
+## 🐳 Starting PostgreSQL with Docker Compose
+
+### Prerequisites
+- Docker and Docker Compose installed on your system
+- Navigate to the `API/database/` directory
+
+### Start PostgreSQL Database
+```bash
+# Navigate to the database directory
+cd API/database/
+
+# Start PostgreSQL and pgAdmin containers
+docker-compose up -d
+
+# Check if containers are running
+docker-compose ps
+
+# View logs
+docker-compose logs -f
+```
+
+### Stop PostgreSQL Database
+```bash
+# Stop containers
+docker-compose down
+
+# Stop and remove volumes (WARNING: This will delete all data)
+docker-compose down -v
+```
+
+### Restart PostgreSQL Database
+```bash
+# Restart containers
+docker-compose restart
+
+# Or stop and start again
+docker-compose down
+docker-compose up -d
+```
+
+### Database Container Status
+```bash
+# Check container health
+docker-compose ps
+
+# View real-time logs
+docker-compose logs -f postgres
+
+# Access PostgreSQL directly
+docker-compose exec postgres psql -U geopulse_user -d geopulse_db
+```
+
 ## Database Access
 
 - **pgAdmin Web Interface**: http://localhost:8080
 - **Database**: `geopulse_db`
 - **Username**: `geopulse_user`
 - **Password**: `password123`
+- **PostgreSQL Port**: 5432
 
 ---
 
