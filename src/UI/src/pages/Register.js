@@ -10,9 +10,10 @@ const Logo = ({ className = "h-32 w-40" }) => {
   if (!logoError) {
     return (
       <img
-        src="/images/AP_logo.png"
+        src="/images/AP_logo2.avif"
         alt="GeoPulse Logo"
-        className={className}
+        className={`${className} border-0 outline-none`}
+        style={{ border: 'none', outline: 'none' }}
         onError={() => setLogoError(true)}
       />
     );
@@ -59,8 +60,21 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Watermark Background */}
+      <div 
+        className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none"
+        style={{
+          backgroundImage: 'url(/images/AP_logo2.avif)',
+          backgroundSize: 'contain',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          transform: 'scale(1.25)',
+          zIndex: 0
+        }}
+      />
+      
+      <div className="max-w-md w-full space-y-8 relative z-10">
                  <div>
            <div className="mx-auto flex items-center justify-center">
              <Logo className="h-32 w-40" />

@@ -18,6 +18,7 @@ const Logo = ({ className = "h-20 w-24" }) => {
   
   // Try different logo file names
   const logoFiles = [
+    '/images/AP_logo2.avif',
     '/images/AP_logo.png',
     '/images/AP_logo.svg',
     '/images/AP_logo.jpg',
@@ -33,7 +34,8 @@ const Logo = ({ className = "h-20 w-24" }) => {
       <img
         src={logoFiles[0]} // Start with the first logo file
         alt="GeoPulse Logo"
-        className={className}
+        className={`${className} border-0 outline-none`}
+        style={{ border: 'none', outline: 'none' }}
         onError={() => setLogoError(true)}
       />
     );
