@@ -1,15 +1,16 @@
-# GeoPulse UI
+# GeoPulse UI - Final Demo Version
 
-A modern React-based user interface for the GeoPulse geospatial data processing platform.
+A modern React-based user interface for the GeoPulse property analysis platform. This is the final demo version with enhanced features including Indian localization, XLSX downloads, and color-coded results.
 
 ## Features
 
-- **User Authentication**: Secure login and registration system
+- **User Authentication**: Secure login and registration system with Indian localization
 - **Dashboard**: Comprehensive overview with metrics and file management
-- **File Upload**: Drag-and-drop file upload with progress tracking
-- **File Management**: View, search, filter, and download processed files
+- **File Upload**: Drag-and-drop CSV upload with progress tracking
+- **File Management**: View, search, filter, download XLSX files, and view HTML results
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 - **Real-time Updates**: Live status updates and notifications
+- **Demo Enhancements**: Color-coded significance indicators, modern UI, 2025 default dates
 
 ## Tech Stack
 

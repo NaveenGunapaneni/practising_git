@@ -1,6 +1,6 @@
-# GeoPulse API
+# GeoPulse API - Final Demo Version
 
-A FastAPI-based user registration and management system with secure authentication, database integration, and comprehensive validation.
+A FastAPI-based property analysis system with secure authentication, satellite imagery processing, and comprehensive environmental change detection. This is the final demo version with all production features implemented.
 
 ## Features
 
@@ -8,11 +8,14 @@ A FastAPI-based user registration and management system with secure authenticati
 - **User Authentication**: Simple email/password login with JWT tokens
 - **Password Security**: Bcrypt password hashing with configurable salt rounds
 - **Database Integration**: Async SQLAlchemy with PostgreSQL support
-- **File Management**: JSON file storage alongside database records
+- **File Management**: CSV processing with XLSX and HTML output generation
+- **Satellite Analysis**: NDVI, NDBI, and NDWI environmental change detection
+- **API Usage Control**: Track and limit API calls per user
 - **Comprehensive Validation**: Pydantic schemas with custom validators
 - **Health Monitoring**: Built-in health check endpoints
 - **Request Logging**: Simple text file logging for requests and errors
 - **API Documentation**: Auto-generated OpenAPI/Swagger docs
+- **Demo Features**: Enhanced UI, color-coded results, Indian localization
 
 ## Quick Start
 

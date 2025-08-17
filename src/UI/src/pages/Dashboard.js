@@ -324,6 +324,9 @@ const Dashboard = () => {
 
     try {
       const response = await axios.get('/api/v1/dashboard', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         params: {
           limit: 50,
           offset: 0,
@@ -331,17 +334,34 @@ const Dashboard = () => {
           sort_order: sortOrder,
           status: statusFilter,
         },
-        timeout: 5000 // 5 second timeout
+        timeout: 10000 // 10 second timeout
       });
 
-             if (response.data.status === 'success') {
-         setDashboardData(response.data.data);
-         setApiConnected(true);
-       }
+      console.log('Dashboard API response:', response.data);
+      
+      if (response.data.status === 'success') {
+        setDashboardData(response.data.data);
+        setApiConnected(true);
+        console.log('Dashboard data updated from API');
+      } else {
+        console.log('API returned non-success status:', response.data.status);
+        setApiConnected(false);
+      }
     } catch (error) {
       console.error('API connection failed:', error);
+      console.error('Error details:', error.response?.data);
       setApiConnected(false);
-      // Don't show error toasts - just silently fail and keep demo data
+      // Show error for debugging in production
+      if (error.response?.status === 401) {
+        toast.error('Authentication failed. Please log in again.');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.reload();
+      } else if (error.response?.status === 500) {
+        toast.error('Server error. Please try again later.');
+      } else if (error.code === 'ECONNABORTED') {
+        toast.error('Request timeout. Please check your connection.');
+      }
     } finally {
       setLoading(false);
     }
@@ -688,7 +708,21 @@ const Dashboard = () => {
       {/* Files Section */}
       <div className="card">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-          <h2 className="text-lg font-medium text-gray-900">Recent Files</h2>
+          <div className="flex items-center space-x-3">
+            <h2 className="text-lg font-medium text-gray-900">Recent Files</h2>
+            {!apiConnected && (
+              <div className="flex items-center space-x-2 px-3 py-1 bg-yellow-100 border border-yellow-300 rounded-full">
+                <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                <span className="text-xs text-yellow-700 font-medium">Demo Mode</span>
+              </div>
+            )}
+            {apiConnected && (
+              <div className="flex items-center space-x-2 px-3 py-1 bg-green-100 border border-green-300 rounded-full">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-xs text-green-700 font-medium">Live Data</span>
+              </div>
+            )}
+          </div>
 
                      {/* Filters */}
            <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">

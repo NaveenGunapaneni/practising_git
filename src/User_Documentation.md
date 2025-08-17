@@ -1,6 +1,6 @@
-# GeoPulse User Documentation
+# GeoPulse User Documentation - Final Demo Version
 
-Welcome to GeoPulse! This comprehensive guide will walk you through every aspect of using the GeoPulse application, from registration to interpreting your results.
+Welcome to GeoPulse! This comprehensive guide will walk you through every aspect of using the GeoPulse application, from registration to interpreting your results. This is the final demo version with all features implemented.
 
 ## Table of Contents
 
@@ -13,13 +13,14 @@ Welcome to GeoPulse! This comprehensive guide will walk you through every aspect
 7. [Dashboard Interpretation](#dashboard-interpretation)
 8. [Troubleshooting](#troubleshooting)
 9. [FAQ](#faq)
+10. [Demo Features](#demo-features)
 
 ---
 
 ## Getting Started
 
 ### What is GeoPulse?
-GeoPulse is a property analysis tool that helps you understand how properties and their surroundings have changed over time. It uses satellite images to show you what has changed in terms of vegetation, water, and development around your properties.
+GeoPulse is a property analysis tool that helps you understand how properties and their surroundings have changed over time. It uses satellite images to show you what has changed in terms of vegetation, water, and development around your properties. This demo version includes all production features with enhanced UI and comprehensive analysis capabilities.
 
 ### System Requirements
 - **Browser**: Any modern web browser (Chrome, Firefox, Safari, Edge)
@@ -35,8 +36,8 @@ GeoPulse is a property analysis tool that helps you understand how properties an
 ## User Registration
 
 ### Step 1: Access the Registration Page
-1. Open your web browser
-2. Navigate to the GeoPulse application URL
+1. Open your web browser 
+2. Navigate to the GeoPulse application URL https://geopulse.data-legos.com/
 3. You'll see the GeoPulse login screen with the official logo
 4. Click on the **"Register"** button or link
 
@@ -72,13 +73,12 @@ Upon successful registration, you will:
 |-------|----------|
 | **Email already exists** | Use a different email address or try logging in |
 | **Password too weak** | Ensure password meets all requirements |
-| **Invalid phone number** | Use standard format: +91-98765-43210 |
+| **Invalid phone number** | Use standard format: +91-98765-412345 |
 | **Organization name too short** | Use at least 2 characters |
 
 ---
 
 ## User Login
-
 ### Step 1: Access Login Page
 1. Navigate to the GeoPulse application
 2. You'll see the login screen with the official logo
@@ -202,7 +202,26 @@ property_id,address,city,state,zip_code,latitude,longitude
 4. Click **"Open"**
 5. Click **"Upload"** button
 
-### Step 3: File Validation
+### Step 3: Configure Project Details
+
+#### Project Information
+After file validation, configure your analysis parameters:
+
+| Field | Description | Example | Default Value |
+|-------|-------------|---------|---------------|
+| **Project Name** | Name for your analysis project | "Mumbai Property Analysis 2025" | (User input required) |
+| **Baseline Period Start** | Start date for baseline period | 01/01/2025 | 01/01/2025 |
+| **Baseline Period End** | End date for baseline period | 31/03/2025 | 31/03/2025 |
+| **Current Period Start** | Start date for current period | 01/07/2025 | 01/07/2025 |
+| **Current Period End** | End date for current period | 31/07/2025 | 31/07/2025 |
+
+#### Date Selection Tips
+- **Baseline Period**: 3-month period for comparison (Jan-Mar 2025)
+- **Current Period**: 1-month period for analysis (Jul 2025)
+- **Gap**: 3-month separation between periods for better change detection
+- **Format**: All dates in DD/MM/YYYY format (Indian standard)
+
+### Step 4: File Validation
 The system will automatically validate your file:
 
 #### Validation Checks
@@ -221,7 +240,7 @@ The system will automatically validate your file:
 ⏱️ Estimated processing time: 15 minutes
 ```
 
-### Step 4: Processing Confirmation
+### Step 5: Processing Confirmation
 After successful upload:
 - **File Status**: "Uploaded - Processing"
 - **Processing Queue**: Your file joins the processing queue
@@ -346,6 +365,12 @@ High-level statistics and insights showing:
 └── ⚪ Pending (Waiting)
 ```
 
+#### Dashboard Connection Status
+The dashboard shows connection status indicators:
+- **🟢 Live Data**: Green badge when connected to API and showing real data
+- **🟡 Demo Mode**: Yellow badge when API is unavailable and showing demo data
+- **Connection Issues**: Error messages appear if authentication fails or server is down
+
 #### File Details View
 Click on any file to see detailed information:
 
@@ -404,16 +429,24 @@ Results: Available for download
 - **Search by Address**: Find specific properties
 
 #### 2. Export Options
-- **Download CSV**: Full analysis results
+- **Download XLSX**: Full analysis results in Excel format with conditional formatting
+- **Download CSV**: Full analysis results in CSV format
 - **Download JSON**: Summary statistics
 - **Download Maps**: Visual representations
 - **Download Report**: Comprehensive PDF report
 
 #### 3. Visualization Tools
+- **HTML Results**: Click "View" to open color-coded results in new tab
 - **Interactive Maps**: Click on properties to see details
 - **Change Charts**: Visual representation of change distributions
 - **Time Series**: View changes over time (if multiple analyses)
 - **Comparison Tools**: Compare different analysis periods
+
+#### HTML Results View
+- **Color-Coded Significance**: Green for "No changes", Red for "Significant changes"
+- **Professional Formatting**: Clean, readable table with styling
+- **New Tab Display**: Results open in separate browser tab
+- **Real-time Data**: Shows actual analysis results with significance indicators
 
 ### Key Metrics to Monitor
 
@@ -465,6 +498,15 @@ Results: Available for download
 | **Account expired** | 30-day trial expired | Contact support to extend or upgrade |
 | **Analyses depleted** | Used all allocated analyses | Purchase additional analyses |
 | **Session timeout** | Inactive for 30 minutes | Log in again |
+
+#### Dashboard Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| **Demo data showing** | API connection failed | Check internet connection and try refreshing |
+| **Authentication error** | Token expired or invalid | Log out and log in again |
+| **No files visible** | No files uploaded yet | Upload your first file to see results |
+| **Connection timeout** | Server is slow or down | Wait and try again, or contact support |
 
 ### Getting Help
 
@@ -523,7 +565,13 @@ A: Negative values indicate vegetation loss, which could be due to development, 
 A: High confidence (90-100%) means the analysis is very reliable. Low confidence suggests potential data quality issues.
 
 **Q: Can I export my results?**
-A: Yes, you can download results in CSV, JSON, and PDF formats.
+A: Yes, you can download results in XLSX format (with conditional formatting), CSV, JSON, and PDF formats.
+
+**Q: How do I view my analysis results?**
+A: Click the "View" button next to any processed file to open color-coded HTML results in a new tab.
+
+**Q: What do the dashboard status badges mean?**
+A: Green "Live Data" means you're viewing real data, Yellow "Demo Mode" means you're viewing sample data due to connection issues.
 
 **Q: How long are my results stored?**
 A: Results are stored for 12 months from the processing date.
@@ -544,6 +592,73 @@ A: You'll need to contact support to extend your account or upgrade to a paid pl
 
 ---
 
+## Demo Features
+
+### Final Demo Version Highlights
+
+This demo version includes all production features with enhanced capabilities:
+
+#### 🎯 **Enhanced User Interface**
+- **Modern Design**: Clean, professional interface with improved UX
+- **Responsive Layout**: Works seamlessly on desktop, tablet, and mobile
+- **Indian Localization**: All dates in DD/MM/YYYY format, Indian phone number examples
+- **Brand Integration**: GeoPulse logo and branding throughout the application
+
+#### 📊 **Advanced Dashboard Features**
+- **Real-time Updates**: Live status updates during file processing
+- **File Management**: View, download, and manage all uploaded files
+- **Download Options**: Download processed files in XLSX format with proper formatting
+- **View Results**: Open HTML results in new tab with color-coded significance indicators
+- **Search & Filter**: Advanced filtering by date, status, and file type
+
+#### 🔍 **Comprehensive Analysis**
+- **Multi-Index Analysis**: NDVI (vegetation), NDBI (built-up areas), NDWI (water/moisture)
+- **Color-Coded Results**: Visual indicators for significance fields
+- **Statistical Significance**: Automatic calculation of change significance
+- **Interpretation Guide**: Human-readable explanations of changes
+
+#### 📁 **File Processing Enhancements**
+- **CSV Support**: Optimized for CSV file processing
+- **Large File Handling**: Support for files up to 50MB
+- **Progress Tracking**: Real-time upload and processing progress
+- **Error Handling**: Comprehensive error messages and validation
+
+#### 🔐 **Security & Authentication**
+- **JWT Authentication**: Secure token-based authentication
+- **User Management**: Individual user accounts with API usage tracking
+- **File Ownership**: Users can only access their own files
+- **Session Management**: Automatic session handling and timeout
+
+#### 📈 **API Usage Control**
+- **Usage Tracking**: Monitor API calls and remaining allocations
+- **Quota Management**: 50 free analyses per user
+- **Usage Analytics**: Detailed breakdown of API consumption
+- **Billing Integration**: Ready for commercial usage tracking
+
+#### 🎨 **Visual Enhancements**
+- **HTML Reports**: Professional HTML output with styling
+- **Excel Formatting**: Automatic Excel file generation with conditional formatting
+- **Color Coding**: Green for "No changes", Red for "Significant changes"
+- **Professional Styling**: Clean, readable output formats
+
+### Demo Configuration
+
+#### Default Settings
+- **Baseline Period**: January 1, 2025 - March 31, 2025 (3 months)
+- **Current Period**: July 1, 2025 - July 31, 2025 (1 month)
+- **File Format**: CSV only
+- **Max File Size**: 50MB
+- **API Calls**: 50 free analyses per user
+
+#### Technical Stack
+- **Frontend**: React.js with Tailwind CSS
+- **Backend**: FastAPI with Python
+- **Database**: PostgreSQL with async operations
+- **File Storage**: Local file system with organized structure
+- **Authentication**: JWT with bcrypt password hashing
+
+---
+
 ## Conclusion
 
 This user documentation provides comprehensive guidance for using GeoPulse effectively. Remember:
@@ -558,5 +673,5 @@ For the most up-to-date information and additional resources, visit our online d
 
 ---
 
-*Last Updated: January 2024*
-*Version: 1.0*
+*Last Updated: January 2025*
+*Version: 2.0 - Final Demo Version*

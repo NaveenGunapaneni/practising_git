@@ -1,10 +1,17 @@
-# GeoPulse Complete Deployment & Validation Guide
+# GeoPulse Complete Deployment & Validation Guide - Final Demo Version
 
 This comprehensive guide provides detailed instructions for deploying and validating the GeoPulse project on a server with the following architecture:
 - **Database**: PostgreSQL running locally (not Docker)
 - **API**: FastAPI application running in conda environment
 - **UI**: React application accessible to the world
 - **Communication**: All services communicate via localhost
+
+## Demo Version Features
+- **Enhanced UI**: Modern interface with Indian localization
+- **XLSX Downloads**: Processed files available in Excel format
+- **HTML Results**: Color-coded significance indicators
+- **Updated Defaults**: 2025 date ranges for analysis
+- **Comprehensive Validation**: Full testing and monitoring suite
 
 ## Table of Contents
 
@@ -1104,4 +1111,35 @@ curl -f http://your-domain.com/
 
 ---
 
-*This comprehensive deployment guide should be updated as the application evolves. Keep a copy of this guide in a secure location and update it whenever changes are made to the deployment process.*
+## Demo Version Notes
+
+### Key Updates in Final Demo Version
+- **Default Dates**: Updated to 2025 date ranges (Jan-Mar baseline, Jul current period)
+- **UI Enhancements**: Indian localization, improved styling, and better UX
+- **Download Features**: XLSX format downloads with proper formatting
+- **View Results**: HTML results with color-coded significance indicators
+- **Security**: Enhanced authentication and file access controls
+- **Monitoring**: Comprehensive system monitoring and validation tools
+
+### Demo Configuration
+- **File Format**: CSV only
+- **Max File Size**: 50MB
+- **API Calls**: 50 free analyses per user
+- **Date Format**: DD/MM/YYYY (Indian standard)
+- **Timezone**: IST (UTC+5:30)
+
+### Production Readiness
+This demo version is production-ready with:
+- Complete authentication system
+- File processing pipeline
+- Database management
+- API usage tracking
+- Comprehensive monitoring
+- Security best practices
+
+---
+
+*This comprehensive deployment guide covers the final demo version of GeoPulse. Keep a copy of this guide in a secure location and update it whenever changes are made to the deployment process.*
+
+*Last Updated: January 2025*
+*Version: 2.0 - Final Demo Version*

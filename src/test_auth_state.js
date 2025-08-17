@@ -37,3 +37,4 @@ async function testCurrentAuth() {
 }
 
 testCurrentAuth();
+
