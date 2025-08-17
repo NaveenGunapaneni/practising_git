@@ -3,6 +3,7 @@
 from datetime import datetime
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request, Response
+from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
@@ -389,6 +390,66 @@ async def download_file(
             detail={
                 "error_code": "E000",
                 "message": "Failed to download file",
+                "details": {"error": str(e)}
+            }
+        )
+
+
+@router.get("/{file_id}/view")
+async def view_html_results(
+    file_id: int,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """View HTML results of processed file."""
+    try:
+        # Get current user ID from authenticated user
+        user_id = current_user.user_id
+        
+        logger.info(f"HTML view request from user {user_id} for file {file_id}")
+        
+        # Initialize services
+        upload_repository = UploadRepository(db)
+        file_processor = CoreFileProcessor()
+        file_validator = FileValidator()
+        
+        upload_service = UploadService(
+            repository=upload_repository,
+            processor=file_processor,
+            validator=file_validator
+        )
+        
+        # Get file information for HTML view
+        file_info = await upload_service.get_html_file(file_id, user_id)
+        
+        # Read HTML file content
+        with open(file_info["html_path"], "r", encoding="utf-8") as f:
+            html_content = f.read()
+        
+        # Return HTML as response
+        return HTMLResponse(
+            content=html_content,
+            headers={
+                "Content-Type": "text/html; charset=utf-8"
+            }
+        )
+        
+    except AuthenticationException as e:
+        logger.warning(f"Authentication failed for HTML view: {str(e)}")
+        raise HTTPException(status_code=401, detail=str(e))
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+        
+    except Exception as e:
+        logger.error(f"Error viewing HTML results: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error_code": "E000",
+                "message": "Failed to view HTML results",
                 "details": {"error": str(e)}
             }
         )

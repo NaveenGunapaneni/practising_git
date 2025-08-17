@@ -74,13 +74,15 @@ const FileUpload = () => {
     });
   };
 
-  // Format date from YYYY-MM-DD to DD/MM/YYYY
+  // Format date from YYYY-MM-DD to DD/MM/YYYY in IST
   const formatDateForDisplay = (dateString) => {
     if (!dateString) return '';
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
+    // Convert to IST timezone (UTC+5:30)
+    const date = new Date(dateString + 'T00:00:00.000Z');
+    const istDate = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
+    const day = String(istDate.getUTCDate()).padStart(2, '0');
+    const month = String(istDate.getUTCMonth() + 1).padStart(2, '0');
+    const year = istDate.getUTCFullYear();
     return `${day}/${month}/${year}`;
   };
 
@@ -132,7 +134,12 @@ const FileUpload = () => {
     const handleDateClick = (date) => {
       if (date) {
         setSelectedDate(date);
-        const formattedDate = date.toISOString().split('T')[0];
+        // Convert to IST timezone (UTC+5:30)
+        const istDate = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
+        const year = istDate.getUTCFullYear();
+        const month = String(istDate.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(istDate.getUTCDate()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
         onDateSelect(fieldName, formattedDate);
         onClose();
       }

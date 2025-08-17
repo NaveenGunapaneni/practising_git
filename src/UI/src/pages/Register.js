@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Building2, Eye, EyeOff, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 // Logo component for login/register pages
 const Logo = ({ className = "h-32 w-40" }) => {
@@ -33,6 +34,7 @@ const Register = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -46,6 +48,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrors({}); // Clear previous errors
 
     try {
       const result = await register(formData);
@@ -54,6 +57,19 @@ const Register = () => {
       }
     } catch (error) {
       console.error('Registration error:', error);
+      
+      // Handle validation errors from API
+      if (error.response?.data?.details) {
+        const validationErrors = {};
+        error.response.data.details.forEach(detail => {
+          validationErrors[detail.field] = detail.message;
+        });
+        setErrors(validationErrors);
+      } else {
+        // Handle generic errors
+        const message = error.response?.data?.message || 'Registration failed. Please try again.';
+        toast.error(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -103,11 +119,14 @@ const Register = () => {
                 name="organization_name"
                 type="text"
                 required
-                className="input-field mt-1"
+                className={`input-field mt-1 ${errors.organization_name ? 'border-red-500' : ''}`}
                 placeholder="Enter organization name"
                 value={formData.organization_name}
                 onChange={handleChange}
               />
+              {errors.organization_name && (
+                <p className="mt-1 text-sm text-red-600">{errors.organization_name}</p>
+              )}
             </div>
 
             <div>
@@ -119,11 +138,14 @@ const Register = () => {
                 name="user_name"
                 type="text"
                 required
-                className="input-field mt-1"
+                className={`input-field mt-1 ${errors.user_name ? 'border-red-500' : ''}`}
                 placeholder="Enter your full name"
                 value={formData.user_name}
                 onChange={handleChange}
               />
+              {errors.user_name && (
+                <p className="mt-1 text-sm text-red-600">{errors.user_name}</p>
+              )}
             </div>
 
             <div>
@@ -135,11 +157,21 @@ const Register = () => {
                 name="contact_phone"
                 type="tel"
                 required
-                className="input-field mt-1"
-                placeholder="Enter phone number"
+                className={`input-field mt-1 ${errors.contact_phone ? 'border-red-500' : ''}`}
+                placeholder="Enter phone number (e.g., +91-98765-43210 or 9876543210)"
                 value={formData.contact_phone}
                 onChange={handleChange}
               />
+              {errors.contact_phone && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.contact_phone === 'Invalid phone number format' 
+                    ? 'Please enter a valid phone number with at least 10 digits. Examples: +91-98765-43210, 9876543210, or 98765 43210'
+                    : errors.contact_phone}
+                </p>
+              )}
+              <p className="mt-1 text-xs text-gray-500">
+                Enter your phone number with country code (e.g., +91 for India) or without. Minimum 10 digits required.
+              </p>
             </div>
 
             <div>
@@ -152,11 +184,18 @@ const Register = () => {
                 type="email"
                 autoComplete="email"
                 required
-                className="input-field mt-1"
+                className={`input-field mt-1 ${errors.email ? 'border-red-500' : ''}`}
                 placeholder="Enter email address"
                 value={formData.email}
                 onChange={handleChange}
               />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.email === 'Invalid email format' 
+                    ? 'Please enter a valid email address (e.g., user@example.com)'
+                    : errors.email}
+                </p>
+              )}
             </div>
 
             <div>
@@ -170,7 +209,7 @@ const Register = () => {
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   required
-                  className="input-field pr-10"
+                  className={`input-field pr-10 ${errors.password ? 'border-red-500' : ''}`}
                   placeholder="Enter password (min 6 characters)"
                   value={formData.password}
                   onChange={handleChange}
@@ -187,6 +226,13 @@ const Register = () => {
                   )}
                 </button>
               </div>
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.password === 'Password must be at least 6 characters long' 
+                    ? 'Password must be at least 6 characters long'
+                    : errors.password}
+                </p>
+              )}
             </div>
 
             <div>

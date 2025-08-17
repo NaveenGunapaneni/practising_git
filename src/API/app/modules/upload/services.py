@@ -366,3 +366,36 @@ class UploadService:
         except Exception as e:
             logger.error(f"Failed to prepare file download: {str(e)}")
             raise FileUploadException(f"Failed to prepare file download: {str(e)}", user_id=user_id)
+
+    async def get_html_file(self, file_id: int, user_id: int):
+        """Get HTML file for viewing results."""
+        try:
+            # Get file record and verify ownership
+            file_record = await self.repository.get_file_by_id(file_id, user_id)
+            
+            if not file_record:
+                raise FileUploadException(f"File not found: {file_id}", user_id=user_id)
+            
+            if not file_record.processed_flag:
+                raise FileUploadException(f"File not yet processed: {file_id}", user_id=user_id)
+            
+            # Construct the HTML file path (same directory as CSV/XLSX, but with .html extension)
+            output_path = Path(file_record.storage_location)
+            html_path = output_path.with_suffix('.html')
+            
+            if not html_path.exists():
+                raise FileUploadException(f"HTML results file not found on disk: {html_path}", user_id=user_id)
+            
+            # Return HTML file information
+            return {
+                "html_path": str(html_path),
+                "filename": html_path.name,
+                "file_size": html_path.stat().st_size
+            }
+            
+        except FileUploadException:
+            # Re-raise known exceptions
+            raise
+        except Exception as e:
+            logger.error(f"Failed to prepare HTML file: {str(e)}")
+            raise FileUploadException(f"Failed to prepare HTML file: {str(e)}", user_id=user_id)

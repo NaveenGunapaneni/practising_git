@@ -72,7 +72,7 @@ Upon successful registration, you will:
 |-------|----------|
 | **Email already exists** | Use a different email address or try logging in |
 | **Password too weak** | Ensure password meets all requirements |
-| **Invalid phone number** | Use standard format: +1-555-123-4567 |
+| **Invalid phone number** | Use standard format: +91-98765-43210 |
 | **Organization name too short** | Use at least 2 characters |
 
 ---
@@ -182,9 +182,9 @@ Your data file must contain the following columns:
 #### Sample Data Format
 ```csv
 property_id,address,city,state,zip_code,latitude,longitude
-1,123 Main St,New York,NY,10001,40.7128,-74.0060
-2,456 Oak Ave,Los Angeles,CA,90210,34.0522,-118.2437
-3,789 Pine Rd,Chicago,IL,60601,41.8781,-87.6298
+1,123 Main Street,Mumbai,Maharashtra,400001,19.0760,72.8777
+2,456 Oak Avenue,Delhi,Delhi,110001,28.7041,77.1025
+3,789 Pine Road,Bangalore,Karnataka,560001,12.9716,77.5946
 ```
 
 ### Step 2: Upload Your File
@@ -351,7 +351,7 @@ Click on any file to see detailed information:
 
 ```
 File: properties_analysis_2024.csv
-Upload Date: January 15, 2024, 10:30 AM
+Upload Date: 15/01/2024, 10:30 AM
 File Size: 2.5 MB
 Properties: 1,250
 Status: ✅ Completed
@@ -470,7 +470,7 @@ Results: Available for download
 
 #### Support Channels
 - **Email Support**: support@geopulse.com
-- **Phone Support**: +1-555-123-4567
+- **Phone Support**: +91-98765-43210
 - **Live Chat**: Available during business hours
 - **Documentation**: This user guide and online help
 

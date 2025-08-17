@@ -17,6 +17,62 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 
+// Helper function to format dates in IST
+const formatDateIST = (dateString) => {
+  try {
+    if (!dateString) return 'N/A';
+    
+    // Handle different date formats
+    let date;
+    if (typeof dateString === 'string') {
+      // If it's already in ISO format, use it directly
+      if (dateString.includes('T')) {
+        date = new Date(dateString);
+      } else {
+        // Add time component for proper parsing
+        date = new Date(dateString + 'T00:00:00.000Z');
+      }
+    } else {
+      date = new Date(dateString);
+    }
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return 'Invalid Date';
+    }
+    
+    // Convert to IST timezone (UTC+5:30)
+    const istDate = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
+    return format(istDate, 'dd/MM/yyyy');
+  } catch (error) {
+    console.error('Error formatting date:', error, 'Date string:', dateString);
+    return 'Invalid Date';
+  }
+};
+
+// Helper function to get download filename
+const getDownloadFilename = (filename) => {
+  if (!filename) return 'processed_file.xlsx';
+  
+  // If it's already an XLSX file, return as is
+  if (filename.toLowerCase().endsWith('.xlsx')) {
+    return filename;
+  }
+  
+  // If it's a CSV file, convert to XLSX
+  if (filename.toLowerCase().endsWith('.csv')) {
+    return filename.replace(/\.csv$/i, '.xlsx');
+  }
+  
+  // If it doesn't have an extension, add .xlsx
+  if (!filename.includes('.')) {
+    return `${filename}.xlsx`;
+  }
+  
+  // For any other extension, replace with .xlsx
+  return filename.replace(/\.[^.]*$/i, '.xlsx');
+};
+
 const Dashboard = () => {
   const { user, token } = useAuth();
   const location = useLocation();
@@ -26,30 +82,30 @@ const Dashboard = () => {
     files: [
       {
         file_id: 1,
-        filename: 'sample_data_2024.csv',
+        filename: 'sample_data_2024_processed.xlsx',
         original_filename: 'sample_data_2024.csv',
         engagement_name: 'GeoPulse Analysis Project',
-        upload_date: new Date().toISOString(), // Today's date
+        upload_date: new Date().toISOString().split('T')[0], // Today's date
         processed_flag: true,
         line_count: 15420,
         file_size_mb: 2.45
       },
       {
         file_id: 2,
-        filename: 'geo_analysis_beta.csv',
+        filename: 'geo_analysis_beta_processed.xlsx',
         original_filename: 'geo_analysis_beta.csv',
         engagement_name: 'Satellite Data Processing',
-        upload_date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // Yesterday
+        upload_date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Yesterday
         processed_flag: false,
         line_count: 8750,
         file_size_mb: 1.78
       },
       {
         file_id: 3,
-        filename: 'location_data_gamma.csv',
+        filename: 'location_data_gamma_processed.xlsx',
         original_filename: 'location_data_gamma.csv',
         engagement_name: 'Forest Land Analysis',
-        upload_date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+        upload_date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 2 days ago
         processed_flag: true,
         line_count: 22100,
         file_size_mb: 3.12
@@ -126,19 +182,24 @@ const Dashboard = () => {
         throw new Error('Downloaded file is empty');
       }
 
+      // Get the correct download filename
+      const downloadFilename = getDownloadFilename(filename);
+
       // Create blob URL and trigger download
-      const blob = new Blob([response.data]);
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', filename);
+      link.setAttribute('download', downloadFilename);
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
 
-      console.log(`Successfully downloaded file: ${filename}`);
-      toast.success('File downloaded successfully');
+      console.log(`Successfully downloaded file: ${downloadFilename}`);
+      toast.success(`File downloaded successfully: ${downloadFilename}`);
     } catch (error) {
       console.error('Download error:', error);
       if (error.response?.status === 401) {
@@ -168,25 +229,72 @@ const Dashboard = () => {
     }
   };
 
-  const handleView = (file) => {
-    // Open file details in a modal or new tab
-    const fileDetails = {
-      filename: file.filename,
-      projectName: file.engagement_name,
-      uploadDate: format(new Date(file.upload_date), 'MMM dd, yyyy'),
-      status: file.processed_flag ? 'Processed' : 'Pending',
-      lineCount: file.line_count?.toLocaleString() || 'N/A',
-      geographies: 'Sample Geography Data', // This would come from API
-    };
-    
-    // For now, show in alert. In production, this would open a modal
-    alert(`File Details:\n\n` +
-          `Project Name: ${fileDetails.projectName}\n` +
-          `File Name: ${fileDetails.filename}\n` +
-          `Upload Date: ${fileDetails.uploadDate}\n` +
-          `Status: ${fileDetails.status}\n` +
-          `Number of Records: ${fileDetails.lineCount}\n` +
-          `Geographies: ${fileDetails.geographies}`);
+  const handleView = async (file) => {
+    try {
+      // Check if user is logged in
+      if (!user || !token) {
+        toast.error('Please log in to view results');
+        return;
+      }
+
+      // Check if this is demo mode (fake token)
+      if (token.startsWith('demo-token-')) {
+        toast.error('View is not available in demo mode. Please log in with a real account.');
+        return;
+      }
+
+      // Check if file is processed
+      if (!file.processed_flag) {
+        toast.error('File is not yet processed. Please wait for processing to complete.');
+        return;
+      }
+
+      console.log(`Attempting to view HTML results for file ${file.file_id}: ${file.filename}`);
+
+      // First, fetch the HTML content with authentication
+      const response = await axios.get(`/api/v1/files/${file.file_id}/view`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        timeout: 30000
+      });
+
+      // Create a blob URL with the HTML content
+      const blob = new Blob([response.data], { type: 'text/html' });
+      const htmlUrl = window.URL.createObjectURL(blob);
+      
+      // Open the HTML content in a new tab
+      const newWindow = window.open(htmlUrl, '_blank');
+      
+      if (!newWindow) {
+        toast.error('Please allow pop-ups to view results in a new tab');
+        window.URL.revokeObjectURL(htmlUrl);
+        return;
+      }
+
+      // Clean up the blob URL after a delay
+      setTimeout(() => {
+        window.URL.revokeObjectURL(htmlUrl);
+      }, 1000);
+
+      toast.success('Opening results in new tab...');
+      
+    } catch (error) {
+      console.error('View error:', error);
+      if (error.response?.status === 401) {
+        toast.error('Authentication failed. Please log in again.');
+        // Clear invalid token
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.reload();
+      } else if (error.response?.status === 404) {
+        toast.error('Results not found on server.');
+      } else if (error.response?.status === 403) {
+        toast.error('Access denied. You do not have permission to view this file.');
+      } else {
+        toast.error(`Failed to view results: ${error.response?.data?.detail || error.message}`);
+      }
+    }
   };
 
   const handleHide = (fileId) => {
@@ -700,7 +808,7 @@ const Dashboard = () => {
                         ) : isYesterday(file.upload_date) ? (
                           <span className="text-blue-600 font-medium">Yesterday</span>
                         ) : (
-                          format(new Date(file.upload_date), 'MMM dd, yyyy')
+                          formatDateIST(file.upload_date)
                         )}
                       </td>
                      

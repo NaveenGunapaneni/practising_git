@@ -690,20 +690,40 @@ class RealSentinelHubProcessor:
             # Create a copy of the dataframe for HTML formatting
             html_df = df.copy()
             
-            # Apply color formatting to entire rows based on Conversion_status
+            # Apply color formatting to entire rows based on Conversion_status and significance fields
             def color_row(row):
+                styles = [''] * len(row)
+                
+                # Check Conversion_status first
                 if 'Conversion_status' in row:
                     status = row['Conversion_status']
                     if status == 'Successful':
                         # Green background for successful status cell only
-                        styles = [''] * len(row)
                         status_col_idx = row.index.get_loc('Conversion_status')
                         styles[status_col_idx] = 'background-color: #ccffcc; color: green; font-weight: bold;'
-                        return styles
                     else:
                         # Red background for entire failed row
                         return ['background-color: #ffcccc; color: red;'] * len(row)
-                return [''] * len(row)
+                
+                # Check significance fields for NDVI, NDBI, NDWI
+                significance_fields = [
+                    'Vegetation (NDVI)-Significance',
+                    'Built-up Area (NDBI)-Significance', 
+                    'Water/Moisture (NDWI)-Significance'
+                ]
+                for field in significance_fields:
+                    if field in row:
+                        field_value = str(row[field]).strip().lower()
+                        if field_value in ['yes', 'true', '1']:
+                            # Red background for "Yes" (changes detected)
+                            field_col_idx = row.index.get_loc(field)
+                            styles[field_col_idx] = 'background-color: #ffcccc; color: red; font-weight: bold;'
+                        elif field_value in ['no', 'false', '0']:
+                            # Green background for "No" (no changes)
+                            field_col_idx = row.index.get_loc(field)
+                            styles[field_col_idx] = 'background-color: #ccffcc; color: green; font-weight: bold;'
+                
+                return styles
             
             # Create styled HTML
             styled_df = html_df.style.apply(color_row, axis=1)
@@ -713,7 +733,7 @@ class RealSentinelHubProcessor:
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Sentinel Hub Analysis Results - {engagement_name}</title>
+                <title>GeoPulse Analysis Results - {engagement_name}</title>
                 <style>
                     body {{ font-family: Arial, sans-serif; margin: 20px; }}
                     h1 {{ color: #333; }}
@@ -722,10 +742,12 @@ class RealSentinelHubProcessor:
                     th {{ background-color: #f2f2f2; font-weight: bold; }}
                     .failed {{ background-color: #ffcccc !important; color: red !important; font-weight: bold; }}
                     .success {{ background-color: #ccffcc !important; color: green !important; font-weight: bold; }}
+                    .significance-yes {{ background-color: #ffcccc !important; color: red !important; font-weight: bold; }}
+                    .significance-no {{ background-color: #ccffcc !important; color: green !important; font-weight: bold; }}
                 </style>
             </head>
             <body>
-                <h1>Sentinel Hub Satellite Analysis Results</h1>
+                <h1>GeoPulse Satellite Analysis Results</h1>
                 <p><strong>Engagement:</strong> {engagement_name}</p>
                 <p><strong>Generated:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
                 <p><strong>Total Properties:</strong> {len(html_df)}</p>
@@ -737,7 +759,10 @@ class RealSentinelHubProcessor:
                     document.addEventListener('DOMContentLoaded', function() {{
                         const rows = document.querySelectorAll('tr');
                         rows.forEach(row => {{
-                            const statusCell = row.querySelector('td:last-child'); // Assuming Conversion_status is last column
+                            const cells = row.querySelectorAll('td');
+                            
+                            // Check Conversion_status (assuming it's the last column)
+                            const statusCell = cells[cells.length - 1];
                             if (statusCell) {{
                                 const status = statusCell.textContent.trim();
                                 if (status === 'Successful') {{
@@ -746,13 +771,37 @@ class RealSentinelHubProcessor:
                                     statusCell.style.fontWeight = 'bold';
                                 }} else if (status !== 'Successful' && status !== '') {{
                                     // Color entire row red for failed cases
-                                    const cells = row.querySelectorAll('td');
                                     cells.forEach(cell => {{
                                         cell.style.backgroundColor = '#ffcccc';
                                         cell.style.color = 'red';
                                     }});
                                 }}
                             }}
+                            
+                            // Check significance fields
+                            const significanceFields = [
+                                'Vegetation (NDVI)-Significance',
+                                'Built-up Area (NDBI)-Significance', 
+                                'Water/Moisture (NDWI)-Significance'
+                            ];
+                            cells.forEach((cell, index) => {{
+                                const headerCell = row.parentElement.querySelector('tr:first-child th:nth-child(' + (index + 1) + ')');
+                                if (headerCell) {{
+                                    const headerText = headerCell.textContent.trim();
+                                    if (significanceFields.includes(headerText)) {{
+                                        const cellValue = cell.textContent.trim().toLowerCase();
+                                        if (cellValue === 'yes' || cellValue === 'true' || cellValue === '1') {{
+                                            cell.style.backgroundColor = '#ffcccc';
+                                            cell.style.color = 'red';
+                                            cell.style.fontWeight = 'bold';
+                                        }} else if (cellValue === 'no' || cellValue === 'false' || cellValue === '0') {{
+                                            cell.style.backgroundColor = '#ccffcc';
+                                            cell.style.color = 'green';
+                                            cell.style.fontWeight = 'bold';
+                                        }}
+                                    }}
+                                }}
+                            }});
                         }});
                     }});
                 </script>
