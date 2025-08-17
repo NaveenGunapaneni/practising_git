@@ -18,10 +18,10 @@ const FileUpload = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [formData, setFormData] = useState({
     engagement_name: '',
-    date1: '2024-03-01', // Baseline Period Start - March 1st
-    date2: '2024-03-31', // Baseline Period End - March 31st
-    date3: '2024-07-01', // Current Period Start - July 1st
-    date4: '2024-07-31', // Current Period End - July 31st
+    date1: '2025-01-01', // Baseline Period Start - January 1st
+    date2: '2025-03-31', // Baseline Period End - March 31st
+    date3: '2025-07-01', // Current Period Start - July 1st
+    date4: '2025-07-31', // Current Period End - July 31st
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const [activeDatePicker, setActiveDatePicker] = useState(null);
