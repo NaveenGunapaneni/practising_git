@@ -613,15 +613,13 @@ class RealSentinelHubProcessor:
             excel_path = output_dir / excel_filename
             self._generate_excel_output(df, excel_path, engagement_name)
             
-            # Generate HTML output with colored status column
-            html_filename = f"{timestamp}_batch_analysis_before{before_period}_{after_period}.html"
-            html_path = output_dir / html_filename
-            self._generate_html_output(df, html_path, engagement_name)
+            # Note: HTML files are now generated on-demand for view functionality
+            # with the new column requirements format
             
             logger.info(f"Real Sentinel Hub output files generated:")
             logger.info(f"  CSV: {csv_path}")
             logger.info(f"  Excel: {excel_path}")
-            logger.info(f"  HTML: {html_path}")
+            logger.info(f"  HTML: Generated on-demand for view functionality")
             
             return csv_path  # Return CSV path as primary output
             
@@ -816,3 +814,302 @@ class RealSentinelHubProcessor:
         except Exception as e:
             logger.warning(f"Failed to generate HTML output: {str(e)}")
             # Don't raise exception as CSV is the primary output
+    
+    def _generate_new_html_output(self, df: pd.DataFrame, html_path: Path, engagement_name: str):
+        """Generate new HTML output with the specified column requirements for view functionality."""
+        
+        try:
+            logger.info(f"=== STARTING HTML GENERATION ===")
+            logger.info(f"Input dataframe shape: {df.shape}")
+            logger.info(f"Input dataframe columns: {list(df.columns)}")
+            
+            # Apply the new column requirements
+            html_df = self._apply_new_column_requirements(df)
+            
+            logger.info(f"=== AFTER COLUMN TRANSFORMATION ===")
+            logger.info(f"Transformed dataframe shape: {html_df.shape}")
+            logger.info(f"Transformed dataframe columns: {list(html_df.columns)}")
+            
+            # Check if dataframe is empty
+            if html_df.empty:
+                logger.error("❌ Transformed dataframe is empty!")
+                return
+            
+            # Check if dataframe has no columns
+            if len(html_df.columns) == 0:
+                logger.error("❌ Transformed dataframe has no columns!")
+                return
+            
+            # Use pandas styling approach like the working HTML file
+            logger.info(f"=== GENERATING HTML WITH PANDAS STYLING ===")
+            
+            # Apply color formatting to Field Visit Required field
+            def color_row(row):
+                styles = [''] * len(row)
+                
+                # Check Field Visit Required field
+                if 'Field Visit Required' in row:
+                    field_value = str(row['Field Visit Required']).strip().lower()
+                    if field_value in ['yes', 'true', '1']:
+                        # Red background for "Yes" (field visit required)
+                        field_col_idx = row.index.get_loc('Field Visit Required')
+                        styles[field_col_idx] = 'background-color: #ffcccc; color: red; font-weight: bold;'
+                    elif field_value in ['no', 'false', '0']:
+                        # Green background for "No" (no field visit required)
+                        field_col_idx = row.index.get_loc('Field Visit Required')
+                        styles[field_col_idx] = 'background-color: #ccffcc; color: green; font-weight: bold;'
+                
+                return styles
+            
+            # Create styled HTML using pandas styling
+            styled_df = html_df.style.apply(color_row, axis=1)
+            
+            # Generate HTML with custom styling
+            html_content = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>GeoPulse Analysis Results - {engagement_name}</title>
+                <style>
+                    body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                    h1 {{ color: #333; }}
+                    table {{ border-collapse: collapse; width: 100%; }}
+                    th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
+                    th {{ background-color: #f2f2f2; font-weight: bold; }}
+                    .field-visit-yes {{ background-color: #ffcccc !important; color: red !important; font-weight: bold; }}
+                    .field-visit-no {{ background-color: #ccffcc !important; color: green !important; font-weight: bold; }}
+                </style>
+            </head>
+            <body>
+                <h1>GeoPulse Satellite Analysis Results</h1>
+                <p><strong>Engagement:</strong> {engagement_name}</p>
+                <p><strong>Generated:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+                <p><strong>Total Properties:</strong> {len(html_df)}</p>
+                
+                {styled_df.to_html(escape=False, table_id='results_table')}
+                
+                <script>
+                    // Additional JavaScript to ensure proper row coloring
+                    document.addEventListener('DOMContentLoaded', function() {{
+                        const rows = document.querySelectorAll('tbody tr');
+                        rows.forEach(row => {{
+                            const cells = row.querySelectorAll('td');
+                            
+                            // Check Field Visit Required field
+                            cells.forEach((cell, index) => {{
+                                const headerCell = row.parentElement.parentElement.querySelector('thead tr th:nth-child(' + (index + 1) + ')');
+                                if (headerCell) {{
+                                    const headerText = headerCell.textContent.trim();
+                                    if (headerText === 'Field Visit Required') {{
+                                        const cellValue = cell.textContent.trim().toLowerCase();
+                                        if (cellValue === 'yes' || cellValue === 'true' || cellValue === '1') {{
+                                            cell.style.backgroundColor = '#ffcccc';
+                                            cell.style.color = 'red';
+                                            cell.style.fontWeight = 'bold';
+                                        }} else if (cellValue === 'no' || cellValue === 'false' || cellValue === '0') {{
+                                            cell.style.backgroundColor = '#ccffcc';
+                                            cell.style.color = 'green';
+                                            cell.style.fontWeight = 'bold';
+                                        }}
+                                    }}
+                                }}
+                            }});
+                        }});
+                    }});
+                </script>
+            </body>
+            </html>
+            """
+            
+            # Write HTML file
+            logger.info(f"Writing HTML file to: {html_path}")
+            with open(html_path, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+            
+            logger.info(f"✅ Successfully generated new HTML file: {html_path}")
+            logger.info(f"HTML file size: {html_path.stat().st_size} bytes")
+            logger.info(f"=== HTML GENERATION COMPLETE ===")
+                
+        except Exception as e:
+            logger.error(f"❌ Failed to generate new HTML output: {str(e)}")
+            logger.error(f"Exception type: {type(e)}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            # Don't raise exception as CSV is the primary output
+    
+    def _apply_new_column_requirements(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Apply the new column requirements as specified in the user request."""
+        
+        try:
+            logger.info(f"=== STARTING COLUMN TRANSFORMATION ===")
+            logger.info(f"Original dataframe shape: {df.shape}")
+            logger.info(f"Original columns: {list(df.columns)}")
+            
+            # Create a new dataframe with only the required columns
+            new_df = pd.DataFrame()
+            logger.info(f"Created empty new dataframe")
+            
+            # Simple direct mapping for basic columns (these exist exactly as expected)
+            basic_columns = ['lp_no', 'extent_ac', 'POINT_ID', 'EASTING-X', 'NORTHING-Y', 'LATITUDE', 'LONGITUDE']
+            
+            logger.info(f"Processing basic columns: {basic_columns}")
+            for col in basic_columns:
+                if col in df.columns:
+                    new_df[col] = df[col]
+                    logger.info(f"✅ Added basic column: {col}")
+                else:
+                    logger.warning(f"❌ Basic column not found: {col}")
+                    # Try to find similar column names
+                    for actual_col in df.columns:
+                        if col.lower() in actual_col.lower() or actual_col.lower() in col.lower():
+                            new_df[col] = df[actual_col]
+                            logger.info(f"✅ Added basic column with fallback: {actual_col} -> {col}")
+                            break
+                    else:
+                        logger.error(f"❌ Could not find any match for basic column: {col}")
+            
+            logger.info(f"After basic columns, new_df shape: {new_df.shape}")
+            logger.info(f"After basic columns, new_df columns: {list(new_df.columns)}")
+            
+            # Create concatenated period columns
+            logger.info(f"Processing period columns...")
+            
+            # Find period columns with flexible matching
+            before_start_col = None
+            before_end_col = None
+            after_start_col = None
+            after_end_col = None
+            
+            for col in df.columns:
+                col_lower = col.lower()
+                if 'before' in col_lower and 'start' in col_lower:
+                    before_start_col = col
+                elif 'before' in col_lower and 'end' in col_lower:
+                    before_end_col = col
+                elif 'after' in col_lower and 'start' in col_lower:
+                    after_start_col = col
+                elif 'after' in col_lower and 'end' in col_lower:
+                    after_end_col = col
+            
+            if before_start_col and before_end_col:
+                new_df['Old Photo Period'] = df[before_start_col].astype(str) + '-TO-' + df[before_end_col].astype(str)
+                logger.info(f"✅ Created Old Photo Period column from {before_start_col} and {before_end_col}")
+            else:
+                logger.warning(f"❌ Missing Before Period columns. Found: {before_start_col}, {before_end_col}")
+            
+            if after_start_col and after_end_col:
+                new_df['New Photo Period'] = df[after_start_col].astype(str) + '-TO-' + df[after_end_col].astype(str)
+                logger.info(f"✅ Created New Photo Period column from {after_start_col} and {after_end_col}")
+            else:
+                logger.warning(f"❌ Missing After Period columns. Found: {after_start_col}, {after_end_col}")
+            
+            logger.info(f"After period columns, new_df shape: {new_df.shape}")
+            logger.info(f"After period columns, new_df columns: {list(new_df.columns)}")
+            
+            # Add renamed interpretation columns (these exist exactly as expected)
+            interpretation_mapping = {
+                'Vegetation (NDVI)-Interpretation': 'Greenary Result',
+                'Built-up Area (NDBI)-Interpretation': 'Construction Result',
+                'Water/Moisture (NDWI)-Interpretation': 'Water/Moisture Result'
+            }
+            
+            logger.info(f"Processing interpretation columns: {list(interpretation_mapping.keys())}")
+            for orig_col, new_col in interpretation_mapping.items():
+                if orig_col in df.columns:
+                    new_df[new_col] = df[orig_col]
+                    logger.info(f"✅ Added interpretation column: {orig_col} -> {new_col}")
+                else:
+                    logger.warning(f"❌ Interpretation column not found: {orig_col}")
+                    # Try to find similar column names
+                    for actual_col in df.columns:
+                        if 'interpretation' in actual_col.lower() and any(keyword in actual_col.lower() for keyword in ['vegetation', 'ndvi', 'built', 'ndbi', 'water', 'ndwi']):
+                            if 'vegetation' in orig_col.lower() and any(keyword in actual_col.lower() for keyword in ['vegetation', 'ndvi']):
+                                new_df[new_col] = df[actual_col]
+                                logger.info(f"✅ Added interpretation column with fallback: {actual_col} -> {new_col}")
+                                break
+                            elif 'built' in orig_col.lower() and any(keyword in actual_col.lower() for keyword in ['built', 'ndbi']):
+                                new_df[new_col] = df[actual_col]
+                                logger.info(f"✅ Added interpretation column with fallback: {actual_col} -> {new_col}")
+                                break
+                            elif 'water' in orig_col.lower() and any(keyword in actual_col.lower() for keyword in ['water', 'ndwi']):
+                                new_df[new_col] = df[actual_col]
+                                logger.info(f"✅ Added interpretation column with fallback: {actual_col} -> {new_col}")
+                                break
+                    else:
+                        logger.error(f"❌ Could not find any match for interpretation column: {orig_col}")
+            
+            logger.info(f"After interpretation columns, new_df shape: {new_df.shape}")
+            logger.info(f"After interpretation columns, new_df columns: {list(new_df.columns)}")
+            
+            # Create the new "Field Visit Required" column
+            logger.info(f"Processing Field Visit Required column...")
+            field_visit_required = []
+            significance_fields = [
+                'Vegetation (NDVI)-Significance',
+                'Built-up Area (NDBI)-Significance',
+                'Water/Moisture (NDWI)-Significance'
+            ]
+            
+            # Check which significance fields exist
+            available_significance_fields = [field for field in significance_fields if field in df.columns]
+            logger.info(f"Available significance fields: {available_significance_fields}")
+            
+            # If no exact matches, try to find similar fields
+            if not available_significance_fields:
+                for field in significance_fields:
+                    for col in df.columns:
+                        if 'significance' in col.lower() and any(keyword in col.lower() for keyword in ['vegetation', 'ndvi', 'built', 'ndbi', 'water', 'ndwi']):
+                            if 'vegetation' in field.lower() and any(keyword in col.lower() for keyword in ['vegetation', 'ndvi']):
+                                available_significance_fields.append(col)
+                                logger.info(f"✅ Found significance field with fallback: {col}")
+                                break
+                            elif 'built' in field.lower() and any(keyword in col.lower() for keyword in ['built', 'ndbi']):
+                                available_significance_fields.append(col)
+                                logger.info(f"✅ Found significance field with fallback: {col}")
+                                break
+                            elif 'water' in field.lower() and any(keyword in col.lower() for keyword in ['water', 'ndwi']):
+                                available_significance_fields.append(col)
+                                logger.info(f"✅ Found significance field with fallback: {col}")
+                                break
+            
+            for idx, (_, row) in enumerate(df.iterrows()):
+                # Check if any significance field is "Yes"
+                requires_visit = False
+                for field in available_significance_fields:
+                    field_value = str(row[field]).strip().lower()
+                    if field_value in ['yes', 'true', '1']:
+                        requires_visit = True
+                        break
+                
+                field_visit_required.append('Yes' if requires_visit else 'No')
+                
+                # Log first few rows for debugging
+                if idx < 3:
+                    logger.info(f"Row {idx}: Field Visit Required = {'Yes' if requires_visit else 'No'}")
+            
+            new_df['Field Visit Required'] = field_visit_required
+            logger.info("✅ Created Field Visit Required column")
+            
+            logger.info(f"=== FINAL RESULT ===")
+            logger.info(f"Final new_df shape: {new_df.shape}")
+            logger.info(f"Final new_df columns: {list(new_df.columns)}")
+            logger.info(f"Final new_df column count: {len(new_df.columns)}")
+            
+            # Ensure we have at least some columns
+            if len(new_df.columns) == 0:
+                logger.error("❌ No columns were added to the new dataframe!")
+                # Add at least the first few columns from original
+                for i, col in enumerate(df.columns[:5]):
+                    new_df[f'Column_{i+1}'] = df[col]
+                    logger.info(f"Emergency fallback: Added {col} as Column_{i+1}")
+            
+            logger.info(f"=== TRANSFORMATION COMPLETE ===")
+            return new_df
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to apply new column requirements: {str(e)}")
+            logger.error(f"Exception type: {type(e)}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            # Return original dataframe if transformation fails
+            return df

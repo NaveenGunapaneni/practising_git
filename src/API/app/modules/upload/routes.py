@@ -470,14 +470,83 @@ async def view_html_results_demo(
         
         # Construct the expected file path for demo
         demo_file_path = f"./user_data/uploads/13/20250819_200853/output/20250819_200908_batch_analysis_before20250101_20250701.csv"
-        html_path = Path(demo_file_path).with_suffix('.html')
+        csv_path = Path(demo_file_path)
+        html_path = csv_path.with_suffix('.html')
         
-        if not html_path.exists():
+        if not csv_path.exists():
             raise HTTPException(
                 status_code=404,
                 detail={
                     "error_code": "E404",
-                    "message": "Demo HTML file not found",
+                    "message": "Demo CSV file not found",
+                    "details": {"file_path": str(csv_path)}
+                }
+            )
+        
+        # Generate new HTML format on-the-fly for demo
+        import pandas as pd
+        from app.modules.upload.processors.real_sentinel_hub_processor import RealSentinelHubProcessor
+        
+        # Read the CSV data with proper encoding handling
+        encodings = ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']
+        df = None
+        
+        for encoding in encodings:
+            try:
+                # Try with different CSV parsing options
+                df = pd.read_csv(
+                    csv_path, 
+                    encoding=encoding,
+                    on_bad_lines='skip',  # Skip problematic lines
+                    engine='python',  # Use python engine for better error handling
+                    quoting=3  # QUOTE_NONE - disable quote parsing
+                )
+                logger.info(f"Successfully read demo CSV with encoding: {encoding}")
+                break
+            except (UnicodeDecodeError, pd.errors.ParserError) as e:
+                logger.warning(f"Failed to read demo CSV with encoding {encoding}: {str(e)}")
+                continue
+        
+        # If still failed, try with more aggressive error handling
+        if df is None:
+            for encoding in encodings:
+                try:
+                    df = pd.read_csv(
+                        csv_path, 
+                        encoding=encoding,
+                        on_bad_lines='skip',
+                        engine='python',
+                        quoting=3,
+                        sep=None,  # Let pandas detect separator
+                        error_bad_lines=False,  # Skip bad lines
+                        warn_bad_lines=False
+                    )
+                    logger.info(f"Successfully read demo CSV with fallback options and encoding: {encoding}")
+                    break
+                except Exception as e:
+                    logger.warning(f"Failed to read demo CSV with fallback options and encoding {encoding}: {str(e)}")
+                    continue
+        
+        if df is None:
+            raise HTTPException(
+                status_code=500,
+                detail={
+                    "error_code": "E500",
+                    "message": "Failed to read demo CSV file with any supported encoding or parsing options",
+                    "details": {"file_path": str(csv_path)}
+                }
+            )
+        
+        # Generate new HTML with the specified column requirements
+        processor = RealSentinelHubProcessor()
+        processor._generate_new_html_output(df, html_path, "Demo Engagement")
+        
+        if not html_path.exists():
+            raise HTTPException(
+                status_code=500,
+                detail={
+                    "error_code": "E500",
+                    "message": "Failed to generate demo HTML file",
                     "details": {"file_path": str(html_path)}
                 }
             )
@@ -508,6 +577,123 @@ async def view_html_results_demo(
                 "details": {"error": str(e)}
             }
         )
+@router.get("/debug/columns/{file_id}")
+async def debug_file_columns(file_id: int, current_user: User = Depends(get_current_user)):
+    """Debug endpoint to inspect the actual columns in a CSV file."""
+    try:
+        logger.info(f"Debugging columns for file ID: {file_id}")
+        
+        # Get the file record
+        file_record = await file_service.get_file_by_id(file_id, current_user.id)
+        if not file_record:
+            raise FileUploadException(f"File not found: {file_id}", user_id=current_user.id)
+        
+        # Construct the correct CSV file path (not the Excel file path)
+        # The storage_location points to the Excel file, but we need the CSV file
+        excel_path = Path(file_record.storage_location)
+        
+        # Convert Excel path to CSV path
+        if excel_path.suffix.lower() == '.xlsx':
+            output_path = excel_path.with_suffix('.csv')
+        else:
+            output_path = excel_path
+        
+        logger.info(f"Looking for CSV file at: {output_path}")
+        
+        if not output_path.exists():
+            raise FileUploadException(f"CSV file not found: {output_path}", user_id=current_user.id)
+        
+        # Read the CSV file with robust encoding handling
+        import pandas as pd
+        
+        # Try different encodings to handle the file properly
+        encodings = ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']
+        df = None
+        
+        for encoding in encodings:
+            try:
+                df = pd.read_csv(
+                    output_path, 
+                    encoding=encoding,
+                    on_bad_lines='skip',
+                    engine='python',
+                    quoting=3
+                )
+                logger.info(f"Successfully read CSV with encoding: {encoding}")
+                break
+            except (UnicodeDecodeError, pd.errors.ParserError) as e:
+                logger.warning(f"Failed to read CSV with encoding {encoding}: {str(e)}")
+                continue
+        
+        if df is None:
+            raise FileUploadException(f"Failed to read CSV file with any supported encoding", user_id=current_user.id)
+        
+        # Analyze the columns
+        actual_columns = list(df.columns)
+        total_columns = len(actual_columns)
+        
+        # Check for expected columns
+        expected_basic = ['lp_no', 'extent_ac', 'POINT_ID', 'EASTING-X', 'NORTHING-Y', 'LATITUDE', 'LONGITUDE']
+        expected_period = ['Before Period Start', 'Before Period End', 'After Period Start', 'After Period End']
+        expected_interpretation = ['Vegetation (NDVI)-Interpretation', 'Built-up Area (NDBI)-Interpretation', 'Water/Moisture (NDWI)-Interpretation']
+        expected_significance = ['Vegetation (NDVI)-Significance', 'Built-up Area (NDBI)-Significance', 'Water/Moisture (NDWI)-Significance']
+        
+        found_basic = [col for col in expected_basic if col in actual_columns]
+        found_period = [col for col in expected_period if col in actual_columns]
+        found_interpretation = [col for col in expected_interpretation if col in actual_columns]
+        found_significance = [col for col in expected_significance if col in actual_columns]
+        
+        # Look for similar columns
+        similar_columns = {}
+        for expected in expected_basic + expected_period + expected_interpretation + expected_significance:
+            similar = []
+            for actual in actual_columns:
+                if any(keyword.lower() in actual.lower() for keyword in expected.lower().split()):
+                    similar.append(actual)
+            if similar:
+                similar_columns[expected] = similar
+        
+        # Create detailed analysis
+        analysis = {
+            "file_id": file_id,
+            "filename": file_record.filename,
+            "total_columns": total_columns,
+            "actual_columns": actual_columns,
+            "column_analysis": {
+                "basic_columns": {
+                    "expected": expected_basic,
+                    "found": found_basic,
+                    "missing": [col for col in expected_basic if col not in actual_columns]
+                },
+                "period_columns": {
+                    "expected": expected_period,
+                    "found": found_period,
+                    "missing": [col for col in expected_period if col not in actual_columns]
+                },
+                "interpretation_columns": {
+                    "expected": expected_interpretation,
+                    "found": found_interpretation,
+                    "missing": [col for col in expected_interpretation if col not in actual_columns]
+                },
+                "significance_columns": {
+                    "expected": expected_significance,
+                    "found": found_significance,
+                    "missing": [col for col in expected_significance if col not in actual_columns]
+                }
+            },
+            "similar_columns": similar_columns,
+            "sample_data": {
+                "shape": df.shape,
+                "first_few_rows": df.head(3).to_dict('records') if len(df) > 0 else []
+            }
+        }
+        
+        logger.info(f"Column analysis completed for file {file_id}")
+        return {"status": "success", "data": analysis}
+        
+    except Exception as e:
+        logger.error(f"Error debugging file columns: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error debugging file columns: {str(e)}")
 @router.post("/test-upload")
 async def test_upload(
     request: Request,

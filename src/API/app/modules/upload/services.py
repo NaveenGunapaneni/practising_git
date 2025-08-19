@@ -379,12 +379,76 @@ class UploadService:
             if not file_record.processed_flag:
                 raise FileUploadException(f"File not yet processed: {file_id}", user_id=user_id)
             
-            # Construct the HTML file path (same directory as CSV/XLSX, but with .html extension)
-            output_path = Path(file_record.storage_location)
+            # Construct the correct CSV file path (not the Excel file path)
+            # The storage_location points to the Excel file, but we need the CSV file for HTML generation
+            excel_path = Path(file_record.storage_location)
+            
+            # Convert Excel path to CSV path
+            if excel_path.suffix.lower() == '.xlsx':
+                output_path = excel_path.with_suffix('.csv')
+            else:
+                output_path = excel_path
+            
+            logger.info(f"Looking for CSV file at: {output_path}")
+            
+            if not output_path.exists():
+                raise FileUploadException(f"CSV file not found on disk: {output_path}", user_id=user_id)
+            
+            # Always generate new HTML format on-demand for view functionality
+            # Read the original CSV data with proper encoding handling
+            import pandas as pd
+            
+            # Try different encodings and CSV parsing options to handle the file properly
+            encodings = ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']
+            df = None
+            
+            for encoding in encodings:
+                try:
+                    # Try with different CSV parsing options
+                    df = pd.read_csv(
+                        output_path, 
+                        encoding=encoding,
+                        on_bad_lines='skip',  # Skip problematic lines
+                        engine='python',  # Use python engine for better error handling
+                        quoting=3  # QUOTE_NONE - disable quote parsing
+                    )
+                    logger.info(f"Successfully read CSV with encoding: {encoding}")
+                    break
+                except (UnicodeDecodeError, pd.errors.ParserError) as e:
+                    logger.warning(f"Failed to read CSV with encoding {encoding}: {str(e)}")
+                    continue
+            
+            # If still failed, try with more aggressive error handling
+            if df is None:
+                for encoding in encodings:
+                    try:
+                        df = pd.read_csv(
+                            output_path, 
+                            encoding=encoding,
+                            on_bad_lines='skip',
+                            engine='python',
+                            quoting=3,
+                            sep=None,  # Let pandas detect separator
+                            error_bad_lines=False,  # Skip bad lines
+                            warn_bad_lines=False
+                        )
+                        logger.info(f"Successfully read CSV with fallback options and encoding: {encoding}")
+                        break
+                    except Exception as e:
+                        logger.warning(f"Failed to read CSV with fallback options and encoding {encoding}: {str(e)}")
+                        continue
+            
+            if df is None:
+                raise FileUploadException(f"Failed to read CSV file with any supported encoding or parsing options", user_id=user_id)
+            
+            logger.info(f"Successfully loaded CSV with {len(df.columns)} columns: {list(df.columns)}")
+            
+            # Generate new HTML with the specified column requirements
             html_path = output_path.with_suffix('.html')
+            self.sentinel_hub_processor._generate_new_html_output(df, html_path, file_record.engagement_name)
             
             if not html_path.exists():
-                raise FileUploadException(f"HTML results file not found on disk: {html_path}", user_id=user_id)
+                raise FileUploadException(f"Failed to generate HTML results file: {html_path}", user_id=user_id)
             
             # Return HTML file information
             return {
