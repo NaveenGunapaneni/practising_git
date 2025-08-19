@@ -163,18 +163,20 @@ const Login = () => {
               )}
             </button>
             
-            <div className="text-center">
+
+            {/* raki commenting out the demo mode */}
+            {/* <div className="text-center">
               <span className="text-sm text-gray-500">or</span>
-            </div>
+            </div> */}
             
-            <button
+            {/* <button
               type="button"
               onClick={handleDemoLogin}
               disabled={loading}
               className="group relative w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Demo Login (Development Mode)
-            </button>
+            </button> */}
           </div>
         </form>
       </div>

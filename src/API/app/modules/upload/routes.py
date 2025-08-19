@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from typing import Optional
+from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request, Response
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -450,6 +451,60 @@ async def view_html_results(
             detail={
                 "error_code": "E000",
                 "message": "Failed to view HTML results",
+                "details": {"error": str(e)}
+            }
+        )
+
+@router.get("/{file_id}/view-demo")
+async def view_html_results_demo(
+    file_id: int,
+    request: Request,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """View HTML results of processed file for demo mode (no authentication required)."""
+    try:
+        logger.info(f"Demo HTML view request for file {file_id}")
+        
+        # For demo mode, we'll use a hardcoded user ID (13) and file path
+        # This is a temporary solution for demo purposes
+        
+        # Construct the expected file path for demo
+        demo_file_path = f"./user_data/uploads/13/20250819_200853/output/20250819_200908_batch_analysis_before20250101_20250701.csv"
+        html_path = Path(demo_file_path).with_suffix('.html')
+        
+        if not html_path.exists():
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "error_code": "E404",
+                    "message": "Demo HTML file not found",
+                    "details": {"file_path": str(html_path)}
+                }
+            )
+        
+        # Read HTML file content
+        with open(html_path, "r", encoding="utf-8") as f:
+            html_content = f.read()
+        
+        # Return HTML as response
+        return HTMLResponse(
+            content=html_content,
+            headers={
+                "Content-Type": "text/html; charset=utf-8"
+            }
+        )
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+        
+    except Exception as e:
+        logger.error(f"Error viewing demo HTML results: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error_code": "E000",
+                "message": "Failed to view demo HTML results",
                 "details": {"error": str(e)}
             }
         )

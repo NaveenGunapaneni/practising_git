@@ -239,8 +239,9 @@ const Dashboard = () => {
 
       // Check if this is demo mode (fake token)
       if (token.startsWith('demo-token-')) {
-        toast.error('View is not available in demo mode. Please log in with a real account.');
-        return;
+        // For demo mode, we'll show a message but still allow viewing
+        toast.info('Demo mode: Opening results in new tab...');
+        // Continue with demo mode instead of blocking
       }
 
       // Check if file is processed
@@ -251,9 +252,14 @@ const Dashboard = () => {
 
       console.log(`Attempting to view HTML results for file ${file.file_id}: ${file.filename}`);
 
-      // First, fetch the HTML content with authentication
-      const response = await axios.get(`/api/v1/files/${file.file_id}/view`, {
-        headers: {
+      // Choose endpoint based on demo mode
+      const endpoint = token.startsWith('demo-token-') 
+        ? `/api/v1/files/${file.file_id}/view-demo`
+        : `/api/v1/files/${file.file_id}/view`;
+
+      // Fetch the HTML content
+      const response = await axios.get(endpoint, {
+        headers: token.startsWith('demo-token-') ? {} : {
           'Authorization': `Bearer ${token}`
         },
         timeout: 30000
@@ -725,32 +731,35 @@ const Dashboard = () => {
           </div>
 
                      {/* Filters */}
-           <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-             <div className="relative">
+           <div className="mt-4 sm:mt-0 flex flex-col md:flex-row gap-2 md:gap-3 flex-wrap">
+             {/* Search Input */}
+             <div className="relative flex-1 min-w-0 md:min-w-[200px]">
                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                <input
                  type="text"
                  placeholder="Search by project name or file name..."
                  value={searchTerm}
                  onChange={(e) => setSearchTerm(e.target.value)}
-                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                />
              </div>
 
+             {/* Status Filter */}
              <select
                value={statusFilter}
                onChange={(e) => setStatusFilter(e.target.value)}
-               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent min-w-[120px] max-w-[150px]"
              >
                <option value="all">All Status</option>
                <option value="processed">Processed</option>
                <option value="pending">Pending</option>
              </select>
 
+             {/* Date Filter */}
              <select
                value={dateFilter}
                onChange={(e) => setDateFilter(e.target.value)}
-               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent min-w-[120px] max-w-[150px]"
              >
                <option value="all">All Dates</option>
                <option value="today">Today</option>
@@ -758,10 +767,11 @@ const Dashboard = () => {
                <option value="this_week">This Week</option>
              </select>
 
+             {/* Sort Dropdown */}
              <select
                value={sortBy}
                onChange={(e) => setSortBy(e.target.value)}
-               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent min-w-[180px] max-w-[220px]"
              >
                <option value="upload_date">Upload Date (Latest First)</option>
                <option value="filename">File Name (A-Z)</option>
@@ -770,9 +780,10 @@ const Dashboard = () => {
                <option value="line_count">Records Count (Highest First)</option>
              </select>
 
+             {/* Sort Order Button */}
              <button
                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-               className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+               className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 min-w-[40px] max-w-[50px] flex items-center justify-center"
                title={sortOrder === 'asc' ? 'Sort Ascending' : 'Sort Descending'}
              >
                {sortOrder === 'asc' ? '↑' : '↓'}
@@ -781,7 +792,7 @@ const Dashboard = () => {
         </div>
 
         {/* Files Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto shadow ring-1 ring-black ring-opacity-5 rounded-lg">
                      <table className="min-w-full divide-y divide-gray-200">
              <thead className="bg-gray-50">
                <tr>
