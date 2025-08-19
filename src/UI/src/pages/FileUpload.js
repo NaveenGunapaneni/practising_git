@@ -489,7 +489,7 @@ const FileUpload = () => {
               {/* Date 1 - Baseline Period Start */}
               <div className="date-picker-container relative">
                 <label htmlFor="date1" className="block text-sm font-medium text-gray-700">
-                  Baseline Period Start *
+                  Old Photo Period Start *
                 </label>
                 <div className="relative">
                   <input
@@ -538,7 +538,7 @@ const FileUpload = () => {
               {/* Date 2 - Baseline Period End */}
               <div className="date-picker-container relative">
                 <label htmlFor="date2" className="block text-sm font-medium text-gray-700">
-                  Baseline Period End *
+                  Old Photo Period End *
                 </label>
                 <div className="relative">
                   <input
@@ -587,7 +587,7 @@ const FileUpload = () => {
               {/* Date 3 - Current Period Start */}
               <div className="date-picker-container relative">
                 <label htmlFor="date3" className="block text-sm font-medium text-gray-700">
-                  Current Period Start *
+                  New Photo Period Start *
                 </label>
                 <div className="relative">
                   <input
@@ -636,7 +636,7 @@ const FileUpload = () => {
               {/* Date 4 - Current Period End */}
               <div className="date-picker-container relative">
                 <label htmlFor="date4" className="block text-sm font-medium text-gray-700">
-                  Current Period End *
+                  New Photo Period End *
                 </label>
                 <div className="relative">
                   <input
