@@ -73,19 +73,20 @@ class GeoPulseAPITester:
         try:
             response = self.session.post(
                 f"{self.api_base}/auth/login",
-                json=credentials
+                data=credentials,
+                headers={'Content-Type': 'application/x-www-form-urlencoded'}
             )
             if response.status_code == 200:
                 data = response.json()
-                if 'access_token' in data:
-                    self.auth_token = data['access_token']
+                if data.get('status') == 'success' and 'data' in data and 'access_token' in data['data']:
+                    self.auth_token = data['data']['access_token']
                     self.session.headers.update({
                         'Authorization': f'Bearer {self.auth_token}'
                     })
                     print(f"✅ Login successful: Token received")
                     return True
                 else:
-                    print(f"❌ Login failed: No access token in response")
+                    print(f"❌ Login failed: No access token in response - {data}")
                     return False
             else:
                 print(f"❌ Login failed: {response.status_code} - {response.text}")
@@ -171,9 +172,10 @@ class GeoPulseAPITester:
         # Test 2: Registration
         print("\n2. Testing User Registration...")
         test_user = {
-            "full_name": "Test User",
+            "user_name": "Test User",
             "email": "test@geopulse.com",
             "password": "TestPassword123",
+            "confirm_password": "TestPassword123",
             "organization_name": "Test Organization",
             "contact_phone": "+1234567890"
         }

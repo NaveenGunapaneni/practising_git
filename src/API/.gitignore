@@ -64,15 +64,13 @@ Thumbs.db
 
 # Configuration files with sensitive data
 *.env
-.env
+
 .env.local
 .env.production
 config.yaml
 config.yml
 *_config.yaml
 *_config.yml
-sentinel_hub_config.yml
-sentinel_hub_user_config.yaml
 
 # Database
 *.db
@@ -114,7 +112,7 @@ coverage.xml
 .python-version
 
 # Environments
-.env
+
 .venv
 env/
 venv/
