@@ -250,7 +250,7 @@ const Dashboard = () => {
         return;
       }
 
-      console.log(`Attempting to view HTML results for file ${file.file_id}: ${file.filename}`);
+      console.log(`Attempting to view HTML results for file ${file.file_id}: ${file.original_filename || file.filename}`);
 
       // Choose endpoint based on demo mode
       const endpoint = token.startsWith('demo-token-') 
@@ -388,7 +388,7 @@ const Dashboard = () => {
   };
 
   const filteredFiles = dashboardData?.files?.filter(file => {
-    const matchesSearch = file.filename.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = (file.original_filename || file.filename).toLowerCase().includes(searchTerm.toLowerCase()) ||
       file.engagement_name.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' ||
@@ -428,8 +428,8 @@ const Dashboard = () => {
     
     switch (sortBy) {
       case 'filename':
-        aValue = a.filename.toLowerCase();
-        bValue = b.filename.toLowerCase();
+        aValue = (a.original_filename || a.filename).toLowerCase();
+        bValue = (b.original_filename || b.filename).toLowerCase();
         break;
       case 'engagement_name':
         aValue = a.engagement_name.toLowerCase();
@@ -837,10 +837,7 @@ const Dashboard = () => {
                          <FileText className="h-5 w-5 text-gray-400 mr-2" />
                          <div>
                            <div className="text-sm font-medium text-gray-900">
-                             {file.filename}
-                           </div>
-                           <div className="text-sm text-gray-500">
-                             {file.original_filename}
+                             {file.original_filename || file.filename}
                            </div>
                          </div>
                        </div>
