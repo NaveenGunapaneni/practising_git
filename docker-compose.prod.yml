@@ -1,0 +1,119 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: geopulse-db-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: geopulse_db
+      POSTGRES_USER: geopulse_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-geopulse_secure_123}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/API/database/setup_postgres.sql:/docker-entrypoint-initdb.d/01-setup.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - geopulse-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U geopulse_user -d geopulse_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  # FastAPI Backend
+  api:
+    build:
+      context: ./src/API
+      dockerfile: Dockerfile.prod
+    container_name: geopulse-api-prod
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://geopulse_user:${POSTGRES_PASSWORD:-geopulse_secure_123}@db:5432/geopulse_db
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-here-change-in-production}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-jwt-secret-key-here-change-in-production}
+      - CORS_ALLOW_ORIGINS=${CORS_ALLOW_ORIGINS:-http://localhost:3000,http://ui:3000}
+      - LOG_LEVEL=INFO
+      - ENVIRONMENT=production
+    volumes:
+      - api_data:/app/user_data
+      - api_logs:/app/logs
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - geopulse-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+
+  # React Frontend (Production Build)
+  ui:
+    build:
+      context: ./src/UI
+      dockerfile: Dockerfile.prod
+    container_name: geopulse-ui-prod
+    restart: unless-stopped
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_API_BASE_URL=http://api:8000
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    networks:
+      - geopulse-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  # Nginx Reverse Proxy (Optional)
+  nginx:
+    image: nginx:alpine
+    container_name: geopulse-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
+      - ui
+    networks:
+      - geopulse-network
+
+volumes:
+  postgres_data:
+    driver: local
+  api_data:
+    driver: local
+  api_logs:
+    driver: local
+
+networks:
+  geopulse-network:
+    driver: bridge
