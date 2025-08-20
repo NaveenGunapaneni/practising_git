@@ -1,3 +1,0 @@
-This is an invalid file type for testing.
-It should be rejected by the API validation.
-Only XLSX, CSV, and XLS files are allowed.
