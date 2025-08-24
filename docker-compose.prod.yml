@@ -89,31 +89,3 @@ services:
         reservations:
           memory: 256M
 
-  # Nginx Reverse Proxy (Optional)
-  nginx:
-    image: nginx:alpine
-    container_name: geopulse-nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
-    depends_on:
-      - api
-      - ui
-    networks:
-      - geopulse-network
-
-volumes:
-  postgres_data:
-    driver: local
-  api_data:
-    driver: local
-  api_logs:
-    driver: local
-
-networks:
-  geopulse-network:
-    driver: bridge

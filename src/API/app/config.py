@@ -68,9 +68,16 @@ class Settings(BaseSettings):
     # Security settings
     security_headers_enabled: bool = Field(default=True, description="Enable security headers")
     
+    # External configuration paths (mounted from host)
+    config_path: str = Field(default="/app/config", description="Path to configuration directory")
+    data_path: str = Field(default="/app/data", description="Path to data directory")
+    output_path: str = Field(default="/app/output", description="Path to output directory")
+    
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+        # Also try to load from mounted config directory
+        env_file = ["/app/config/.env", ".env"]
 
 
 # Global settings instance

@@ -1,0 +1,143 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: geopulse-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-geopulse_db}
+      POSTGRES_USER: ${POSTGRES_USER:-geopulse_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-geopulse_secure_123}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - ${SHARED_DATA_PATH:-./shared_data}/database:/var/lib/postgresql/data
+      - ./src/API/database/setup_postgres.sql:/docker-entrypoint-initdb.d/01-setup.sql
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    networks:
+      - geopulse-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-geopulse_user} -d ${POSTGRES_DB:-geopulse_db}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # FastAPI Backend
+  api:
+    build:
+      context: ./src/API
+      dockerfile: Dockerfile
+    container_name: geopulse-api
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-geopulse_user}:${POSTGRES_PASSWORD:-geopulse_secure_123}@db:5432/${POSTGRES_DB:-geopulse_db}
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-here-change-in-production}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-jwt-secret-key-here-change-in-production}
+      - CORS_ALLOW_ORIGINS=${CORS_ALLOW_ORIGINS:-http://localhost:3001,http://ui:3000,https://localhost}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - CONFIG_PATH=/app/config
+      - DATA_PATH=/app/data
+      - OUTPUT_PATH=/app/output
+    volumes:
+      - ${SHARED_DATA_PATH:-./shared_data}/uploads:/app/user_data/uploads
+      - ${SHARED_DATA_PATH:-./shared_data}/temp:/app/user_data/temp
+      - ${SHARED_DATA_PATH:-./shared_data}/logs:/app/logs
+      - ${SHARED_DATA_PATH:-./shared_data}/config:/app/config:ro
+      - ${SHARED_DATA_PATH:-./shared_data}/output:/app/output
+      - ${SHARED_DATA_PATH:-./shared_data}/user_data:/app/user_data
+    expose:
+      - "8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - geopulse-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # React Frontend
+  ui:
+    build:
+      context: ./src/UI
+      dockerfile: Dockerfile
+    container_name: geopulse-ui
+    restart: unless-stopped
+    environment:
+      - REACT_APP_API_URL=${REACT_APP_API_URL:-https://localhost/api}
+      - REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL:-http://api:8000}
+    expose:
+      - "3000"
+    depends_on:
+      - api
+    networks:
+      - geopulse-network
+    volumes:
+      - ui_node_modules:/app/node_modules
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Nginx Reverse Proxy
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: geopulse-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - nginx_ssl:/etc/nginx/ssl
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - api
+      - ui
+    networks:
+      - geopulse-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    command: >
+      sh -c "
+        /usr/local/bin/generate-ssl-certs.sh &&
+        nginx -g 'daemon off;'
+      "
+
+  # Optional: pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: geopulse-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@geopulse.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    depends_on:
+      - db
+    networks:
+      - geopulse-network
+
+volumes:
+  ui_node_modules:
+    driver: local
+  nginx_ssl:
+    driver: local
+  nginx_logs:
+    driver: local
+
+networks:
+  geopulse-network:
+    driver: bridge

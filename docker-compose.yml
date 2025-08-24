@@ -7,19 +7,19 @@ services:
     container_name: geopulse-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: geopulse_db
-      POSTGRES_USER: geopulse_user
-      POSTGRES_PASSWORD: geopulse_secure_123
+      POSTGRES_DB: ${POSTGRES_DB:-geopulse_db}
+      POSTGRES_USER: ${POSTGRES_USER:-geopulse_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-geopulse_secure_123}
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ${SHARED_DATA_PATH:-./shared_data}/database:/var/lib/postgresql/data
       - ./src/API/database/setup_postgres.sql:/docker-entrypoint-initdb.d/01-setup.sql
     ports:
-      - "5433:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     networks:
       - geopulse-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U geopulse_user -d geopulse_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-geopulse_user} -d ${POSTGRES_DB:-geopulse_db}"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -32,16 +32,23 @@ services:
     container_name: geopulse-api
     restart: unless-stopped
     environment:
-      - DATABASE_URL=postgresql+asyncpg://geopulse_user:geopulse_secure_123@db:5432/geopulse_db
-      - SECRET_KEY=your-secret-key-here-change-in-production
-      - JWT_SECRET_KEY=your-jwt-secret-key-here-change-in-production
-      - CORS_ALLOW_ORIGINS=http://localhost:3001,http://ui:3000
-      - LOG_LEVEL=INFO
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-geopulse_user}:${POSTGRES_PASSWORD:-geopulse_secure_123}@db:5432/${POSTGRES_DB:-geopulse_db}
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-here-change-in-production}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-jwt-secret-key-here-change-in-production}
+      - CORS_ALLOW_ORIGINS=${CORS_ALLOW_ORIGINS:-http://localhost:3001,http://ui:3000}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - CONFIG_PATH=/app/config
+      - DATA_PATH=/app/data
+      - OUTPUT_PATH=/app/output
     volumes:
-      - api_data:/app/user_data
-      - api_logs:/app/logs
+      - ${SHARED_DATA_PATH:-./shared_data}/uploads:/app/user_data/uploads
+      - ${SHARED_DATA_PATH:-./shared_data}/temp:/app/user_data/temp
+      - ${SHARED_DATA_PATH:-./shared_data}/logs:/app/logs
+      - ${SHARED_DATA_PATH:-./shared_data}/config:/app/config:ro
+      - ${SHARED_DATA_PATH:-./shared_data}/output:/app/output
+      - ${SHARED_DATA_PATH:-./shared_data}/user_data:/app/user_data
     ports:
-      - "8000:8000"
+      - "${API_PORT:-8000}:8000"
     depends_on:
       db:
         condition: service_healthy
@@ -61,10 +68,10 @@ services:
     container_name: geopulse-ui
     restart: unless-stopped
     environment:
-      - REACT_APP_API_URL=http://localhost:8000
-      - REACT_APP_API_BASE_URL=http://api:8000
+      - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:8000}
+      - REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL:-http://api:8000}
     ports:
-      - "3001:3000"
+      - "${UI_PORT:-3001}:3000"
     depends_on:
       - api
     networks:
@@ -84,23 +91,17 @@ services:
     container_name: geopulse-pgadmin
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@geopulse.com
-      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@geopulse.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
-      - "5050:80"
+      - "${PGADMIN_PORT:-5050}:80"
     depends_on:
       - db
     networks:
       - geopulse-network
 
 volumes:
-  postgres_data:
-    driver: local
-  api_data:
-    driver: local
-  api_logs:
-    driver: local
   ui_node_modules:
     driver: local
 
