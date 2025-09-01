@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 // Logo component for login/register pages
 const Logo = ({ className = "h-32 w-40" }) => {
   const [logoError, setLogoError] = useState(false);
-  
+
   if (!logoError) {
     return (
       <img
@@ -57,7 +57,7 @@ const Register = () => {
       }
     } catch (error) {
       console.error('Registration error:', error);
-      
+
       // Handle validation errors from API
       if (error.response?.data?.details) {
         const validationErrors = {};
@@ -78,7 +78,7 @@ const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Watermark Background */}
-      <div 
+      <div
         className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none"
         style={{
           backgroundImage: 'url(/images/AP_logo2.avif)',
@@ -89,12 +89,12 @@ const Register = () => {
           zIndex: 0
         }}
       />
-      
+
       <div className="max-w-md w-full space-y-8 relative z-10">
-                 <div>
-           <div className="mx-auto flex items-center justify-center">
-             <Logo className="h-32 w-40" />
-           </div>
+        <div>
+          <div className="mx-auto flex items-center justify-center">
+            <Logo className="h-32 w-40" />
+          </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Create your account
           </h2>
@@ -164,7 +164,7 @@ const Register = () => {
               />
               {errors.contact_phone && (
                 <p className="mt-1 text-sm text-red-600">
-                  {errors.contact_phone === 'Invalid phone number format' 
+                  {errors.contact_phone === 'Invalid phone number format'
                     ? 'Please enter a valid phone number with at least 10 digits. Examples: +91-98765-43210, 9876543210, or 98765 43210'
                     : errors.contact_phone}
                 </p>
@@ -191,7 +191,7 @@ const Register = () => {
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">
-                  {errors.email === 'Invalid email format' 
+                  {errors.email === 'Invalid email format'
                     ? 'Please enter a valid email address (e.g., user@example.com)'
                     : errors.email}
                 </p>
@@ -228,7 +228,7 @@ const Register = () => {
               </div>
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">
-                  {errors.password === 'Password must be at least 6 characters long' 
+                  {errors.password === 'Password must be at least 6 characters long'
                     ? 'Password must be at least 6 characters long'
                     : errors.password}
                 </p>

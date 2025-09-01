@@ -25,6 +25,70 @@
     @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
   }
   
+  .custom-select {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900 shadow-sm;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding-right: 2.5rem;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1rem 1rem;
+  }
+  
+  .custom-select:focus {
+    @apply ring-2 ring-primary-500 border-transparent;
+  }
+  
+  /* Dropdown menu styling */
+  .acreage-dropdown {
+    border-radius: 0.5rem !important;
+  }
+  
+  .acreage-dropdown option {
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    margin: 0.125rem;
+    background-color: white;
+  }
+  
+  .acreage-dropdown option:hover {
+    background-color: #f3f4f6;
+    border-radius: 0.375rem;
+  }
+  
+  .acreage-dropdown option:checked {
+    background-color: #3b82f6;
+    color: white;
+    border-radius: 0.375rem;
+  }
+  
+  /* Webkit browsers (Chrome, Safari) dropdown styling */
+  .acreage-dropdown::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .acreage-dropdown::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 0.5rem;
+  }
+  
+  .acreage-dropdown::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 0.5rem;
+  }
+  
+  .acreage-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+  
+  /* Firefox dropdown styling */
+  .acreage-dropdown {
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 #f1f1f1;
+  }
+  
   .card {
     @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
   }

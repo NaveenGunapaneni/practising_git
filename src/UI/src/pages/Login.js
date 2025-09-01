@@ -164,12 +164,12 @@ const Login = () => {
             </button>
             
 
-            {/* raki commenting out the demo mode */}
+            {/* Demo login commented out */}
             {/* <div className="text-center">
               <span className="text-sm text-gray-500">or</span>
-            </div> */}
+            </div>
             
-            {/* <button
+            <button
               type="button"
               onClick={handleDemoLogin}
               disabled={loading}
