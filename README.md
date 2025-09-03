@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # GeoPulse
 
 A geospatial data processing web application with React frontend and FastAPI backend.
@@ -124,3 +125,6 @@ Run frontend tests:
 cd src/UI
 npm test
 ```
+=======
+# practising_git
+>>>>>>> d9d13dd4c29f98e7a8ea02b6565f7288c2084f16
